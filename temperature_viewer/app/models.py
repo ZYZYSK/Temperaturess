@@ -6,7 +6,7 @@ from django.db import models
 # 観測値
 class TimeData(models.Model):
     # 日時
-    tm = models.DateTimeField()
+    tm = models.DateTimeField(primary_key=True)
     # 気温
     temperature = models.FloatField(null=True)
     # 湿度
@@ -16,7 +16,7 @@ class TimeData(models.Model):
 # 日別値
 class DayData(models.Model):
     # 日付
-    day = models.DateField()
+    day = models.DateField(primary_key=True)
     # 最低気温
     temperature_min = models.ForeignKey(TimeData, null=True, on_delete=models.SET_NULL, related_name='temperature_min')
     # 最高気温
@@ -27,12 +27,14 @@ class DayData(models.Model):
     humidity_ave = models.IntegerField(null=True)
     # 最低湿度
     humidity_min = models.ForeignKey(TimeData, null=True, on_delete=models.SET_NULL, related_name='humidity_min')
+    # 天気
+    weather = models.CharField(null=True, max_length=50)
 
 
 # 平年値
 class NormalData(models.Model):
     # 日付
-    day = models.DateField()
+    day = models.DateField(primary_key=True)
     # 最低気温
     temperature_min = models.FloatField()
     # 最高気温
