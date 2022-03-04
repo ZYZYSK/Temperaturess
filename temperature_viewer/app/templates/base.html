@@ -9,6 +9,13 @@
   <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
 </head>
 <body>
-  
+  <script src={% static 'js/bootstrap.bundle.min.js' %}></script>
+  {% comment %} ナビゲーションバー {% endcomment %}
+  <ul class="nav nav-pills nav-fill">
+    <li class="nav-item">
+      <div class="navbar-brand">気温ビューア</a>
+    </li>
+    {% block nav %}{% endblock nav %}
+  </ul>
 </body>
 </html>
