@@ -11,6 +11,8 @@ class TimeData(models.Model):
     temperature = models.FloatField(null=True)
     # 湿度
     humidity = models.IntegerField(null=True)
+    # 外部プローブ
+    is_external = models.BooleanField(null=True)
 
 
 # 日別値
