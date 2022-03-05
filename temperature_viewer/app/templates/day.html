@@ -1,13 +1,37 @@
 {% extends 'base.html' %}
 {% comment %} ナビゲーションバー {% endcomment %}
 {% block nav %}
-<li class="nav-item">
-  <a class="nav-link" href={% url 'year' %}>年</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href={% url 'month' %}>月</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link active" href={% url 'day' %} aria-current="page">日</a>
-</li>
+<span class="navbar-brand mb-0 h1">{{ year }} 年 {{ month}} 月 {{day}} 日</span>
 {% endblock nav %}
+{% comment %} 気温一覧 {% endcomment %}
+{% block free %}
+<table id="table_main" class="table table-striped">
+  <thead>
+    <tr>
+      <th>時刻</th>
+      <th>気温</th>
+      <th>湿度</th>
+      <th>外部プローブ</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for timedata in timedata_list %}
+    <tr>
+      <td>{{timedata.tm|time:"H:i"}}</td>
+      <td>{{timedata.temperature|floatformat:1}}</td>
+      <td>{{timedata.humidity|floatformat:0}}</td>
+      <td>{% if timedata.is_external %}〇{% else %}✕{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<script type="text/javascript">
+  $(document).ready(function(){
+    $('#table_main').DataTable({
+      "paging":false,
+      "info":false,
+      "searching":false
+    });
+  });
+</script>
+{% endblock free %}

@@ -13,6 +13,8 @@ class TimeData(models.Model):
     humidity = models.IntegerField(null=True)
     # 外部プローブ
     is_external = models.BooleanField(null=True)
+    # バッテリーの残量
+    battery = models.IntegerField(null=True)
 
 
 # 日別値
