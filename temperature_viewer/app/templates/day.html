@@ -1,37 +1,98 @@
 {% extends 'base.html' %}
+{% load datetime_calculation %}
 {% comment %} ナビゲーションバー {% endcomment %}
 {% block nav %}
-<span class="navbar-brand mb-0 h1">{{ year }} 年 {{ month}} 月 {{day}} 日</span>
+  {% comment %} 前日 {% endcomment %}
+  {% previous_year year month day as previous_year%}
+  {% previous_month year month day as previous_month%}
+  {% previous_day year month day as previous_day%}
+  <li class="nav-item mr-4">
+    {% comment %} 最古の日付の場合 {% endcomment %}
+    {% if oldest %}
+      <a class="nav-link disabled" disabled="true"><前日</a>
+    {% comment %} それ以外の場合 {% endcomment %}
+    {% else %}
+      <a href={% url 'day' previous_year previous_month previous_day%} class="nav-link text-info"><前日</a>
+    {% endif %}
+  </li>
+  {% comment %} 今日の日付 {% endcomment %}
+  <li class="nav_item">
+    <span class="navbar-brand mb-0 h1">{{year}} 年 {{month}} 月 {{day}} 日</span>
+  </li>
+  {% comment %} 翌日 {% endcomment %}
+  {% now "Y" as current_year%}
+  {% now "n" as current_month%}
+  {% now "j" as current_day%}
+  {% next_year year month day as next_year%}
+  {% next_month year month day as next_month%}
+  {% next_day year month day as next_day%}
+  <li class="nav-item ml-2">
+    {% comment %} 最新の日付の場合 {% endcomment %}
+    {% if year|stringformat:"s" == current_year and month|stringformat:"s" == current_month and day|stringformat:"s" == current_day%}
+      <a  class="nav-link disabled">翌日></a>
+    {% comment %} それ以外 {% endcomment %}
+    {% else %}
+      <a href={% url 'day' next_year next_month next_day%} class="nav-link text-info">翌日></a>
+    {% endif %}
+  </li>
 {% endblock nav %}
-{% comment %} 気温一覧 {% endcomment %}
 {% block free %}
-<table id="table_main" class="table table-striped">
-  <thead>
-    <tr>
-      <th>時刻</th>
-      <th>気温</th>
-      <th>湿度</th>
-      <th>外部プローブ</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for timedata in timedata_list %}
-    <tr>
-      <td>{{timedata.tm|time:"H:i"}}</td>
-      <td>{{timedata.temperature|floatformat:1}}</td>
-      <td>{{timedata.humidity|floatformat:0}}</td>
-      <td>{% if timedata.is_external %}〇{% else %}✕{% endif %}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
-<script type="text/javascript">
-  $(document).ready(function(){
-    $('#table_main').DataTable({
-      "paging":false,
-      "info":false,
-      "searching":false
+  {% comment %} 一覧 {% endcomment %}
+  <table id="table_main" class="table table-striped table-hover">
+    <thead>
+      <tr>
+        <th style="width:20%">時刻</th>
+        <th style="width:20%">気温(℃)</th>
+        <th style="width:20%">湿度(%)</th>
+        <th style="width:20%">外部プローブ</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for timedata in timedata_list|dictsort:"tm" %}
+      <tr>
+        <td>{{timedata.tm|time:"H:i"}}</td>
+        <td>{{timedata.temperature|floatformat:1}}</td>
+        <td>{{timedata.humidity|floatformat:0}}</td>
+        <td>{% if timedata.is_external %}〇{% else %}✕{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% comment %} 要約 {% endcomment %}
+  {% with timedata_list|dictsort:"temperature"|first as temperature_min %}
+  {% with timedata_list|dictsortreversed:"temperature"|first as temperature_max %}
+    <table class="table table-striped table-hover table-dark h6">
+      <thead>
+        <th scope="col" style="width:20%"></th>
+        <th scope="col" style="width:20%">気温(℃)</th>
+        <th scope="col" style="width:20%">湿度(%)</th>
+        <th scope="col" style="width:20%">時刻</th>
+      </thead>
+      <tbody>
+        <tr>
+          <td scope="row">最低気温</td>
+          <td>{{temperature_min.temperature|floatformat:1}}</td>
+          <td>{{temperature_min.humidity|floatformat:0}}%</td>
+          <td>{{temperature_min.tm|time:"H:i"}}</td>
+        </tr>
+        <tr>
+          <td scope="row">最高気温</td>
+          <td>{{temperature_max.temperature|floatformat:1}}</td>
+          <td>{{temperature_max.humidity|floatformat:0}}%</td>
+          <td>{{temperature_max.tm|time:"H:i"}}</td>
+        </tr>
+      </tbody>
+    </table>
+  {% endwith %}
+  {% endwith %}
+  {% comment %} スクリプト {% endcomment %}
+  <script type="text/javascript">
+    $(document).ready(function(){
+      $('#table_main').DataTable({
+        "paging":false,
+        "info":false,
+        "searching":false
+      });
     });
-  });
-</script>
+  </script>
 {% endblock free %}

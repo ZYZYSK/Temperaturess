@@ -9,7 +9,7 @@ from app.models import *
 def view_index(request):
     # 最新の年月にジャンプ
     tm_current = datetime.datetime.now()
-    return redirect(f'{tm_current.year}/{tm_current.month}')
+    return redirect(f'{tm_current.year}/{tm_current.month}/{tm_current.day}')
 
 
 class YearView(TemplateView):
@@ -18,7 +18,7 @@ class YearView(TemplateView):
     # アスタリスク2つ：辞書型引数
 
     def get(self, request, *args, **kwargs):
-        context = super(DayView, self).get_context_data(**kwargs)
+        context = super(YearView, self).get_context_data(**kwargs)
         # データベースからオブジェクトの取得
         context['daydata_list'] = get_list_or_404(DayData.objects.filter(day__year=kwargs['year']))
         context['normaldata_list'] = get_list_or_404(NormalData.objects.filter(day__year=kwargs['year']))
@@ -50,6 +50,12 @@ class DayView(TemplateView):
         context['year'] = kwargs['year']
         context['month'] = kwargs['month']
         context['day'] = kwargs['day']
+        # 最古の日付かどうか
+        object_oldest = DayData.objects.order_by('day').first()
+        if object_oldest is not None:
+            context['oldest'] = object_oldest.day.year == kwargs['year'] and object_oldest.day.month == kwargs['month'] and object_oldest.day.day == kwargs['day']
+        else:
+            context['oldest'] = False
         # データベースからオブジェクトの取得
         context['timedata_list'] = get_list_or_404(TimeData.objects.filter(tm__year=kwargs['year'], tm__month=kwargs['month'], tm__day=kwargs['day']))
         return render(self.request, self.template_name, context)

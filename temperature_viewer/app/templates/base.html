@@ -1,4 +1,6 @@
 {% load static %}
+{% load datetime_calculation %}
+
 <!DOCTYPE html>
 <html lang="ja">
   <head>
@@ -9,6 +11,7 @@
     {% comment %} CSS {% endcomment %}
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/datatables.min.css' %}">
+    <link rel="stylesheet" href="origin.css">
   </head>
 <body>
   {% comment %} JS {% endcomment %}
@@ -24,21 +27,21 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       {% comment %} タイトル {% endcomment %}
-      <span class="navbar-brand">気温Viewer</span>
+      <span class="navbar-brand mr-5">気温Viewer</span>
       {% comment %} 本体 {% endcomment %}
       <div class="collapse navbar-collapse" id="navbarToggle">
-        <ul class="navbar-nav mb-2 mb-lg-0 mr-auto">
+        <ul class="navbar-nav mr-auto">
           {% block nav %}{% endblock nav %}
         </ul>
-        <ul class="navbar-nav mb-2 mb-lg-0">
+        <ul class="navbar-nav">
           <li class="nav-item">
-            <a class="nav-link" href='#'>年</a>
+            <a class="nav-link text-light" href={% url 'year' year %}>年</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href='#'>月</a>
+            <a class="nav-link text-light" href={% url 'month' year month %}>月</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href='#'>日</a>
+            <a class="nav-link text-light" href={% url 'day' year month day %}>日</a>
           </li>
         </ul>
       </div>
