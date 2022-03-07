@@ -17,11 +17,12 @@ from unicodedata import name
 from django.contrib import admin
 from django.shortcuts import redirect
 from django.urls import path
-from app.views import YearView, MonthView, DayView, view_index
+from app.views import YearView, MonthView, DayView, UploadView, view_index
 urlpatterns = [
     path('admin/', admin.site.urls, name='admin'),
     path('', view_index, name='index'),
     path('<int:year>', YearView.as_view(), name='year'),
     path('<int:year>/<int:month>', MonthView.as_view(), name='month'),
     path('<int:year>/<int:month>/<int:day>', DayView.as_view(), name='day'),
+    path('upload/', UploadView.as_view(), name='upload')
 ]

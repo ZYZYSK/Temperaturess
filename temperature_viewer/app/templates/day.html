@@ -6,18 +6,18 @@
   {% previous_year year month day as previous_year%}
   {% previous_month year month day as previous_month%}
   {% previous_day year month day as previous_day%}
-  <li class="nav-item mr-4">
+  <li class="nav-item ms-3 ms-sm-0 me-sm-3">
     {% comment %} 最古の日付の場合 {% endcomment %}
     {% if oldest %}
       <a class="nav-link disabled" disabled="true"><前日</a>
     {% comment %} それ以外の場合 {% endcomment %}
     {% else %}
-      <a href={% url 'day' previous_year previous_month previous_day%} class="nav-link text-info"><前日</a>
+      <a href={% url 'day' previous_year previous_month previous_day%} class="nav-link"><前日</a>
     {% endif %}
   </li>
   {% comment %} 今日の日付 {% endcomment %}
-  <li class="nav_item">
-    <span class="navbar-brand mb-0 h1">{{year}} 年 {{month}} 月 {{day}} 日</span>
+  <li class="nav_item ms-3 ms-sm-0 mt-2">
+    <span class="navbar-brand h1">{{year}} 年 {{month}} 月 {{day}} 日</span>
   </li>
   {% comment %} 翌日 {% endcomment %}
   {% now "Y" as current_year%}
@@ -26,19 +26,19 @@
   {% next_year year month day as next_year%}
   {% next_month year month day as next_month%}
   {% next_day year month day as next_day%}
-  <li class="nav-item ml-2">
+  <li class="nav-item ms-3 ms-sm-1">
     {% comment %} 最新の日付の場合 {% endcomment %}
     {% if year|stringformat:"s" == current_year and month|stringformat:"s" == current_month and day|stringformat:"s" == current_day%}
       <a  class="nav-link disabled">翌日></a>
     {% comment %} それ以外 {% endcomment %}
     {% else %}
-      <a href={% url 'day' next_year next_month next_day%} class="nav-link text-info">翌日></a>
+      <a href={% url 'day' next_year next_month next_day%} class="nav-link">翌日></a>
     {% endif %}
   </li>
 {% endblock nav %}
 {% block free %}
   {% comment %} 一覧 {% endcomment %}
-  <table id="table_main" class="table table-striped table-hover">
+  <table id="table_main" class="table table-striped table-hover table-bordered">
     <thead>
       <tr>
         <th style="width:20%">時刻</th>
@@ -61,7 +61,7 @@
   {% comment %} 要約 {% endcomment %}
   {% with timedata_list|dictsort:"temperature"|first as temperature_min %}
   {% with timedata_list|dictsortreversed:"temperature"|first as temperature_max %}
-    <table class="table table-striped table-hover table-dark h6">
+    <table class="table table-striped table-hover table-dark h6 mt-2 table-bordered">
       <thead>
         <th scope="col" style="width:20%"></th>
         <th scope="col" style="width:20%">気温(℃)</th>

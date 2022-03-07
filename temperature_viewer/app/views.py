@@ -1,3 +1,4 @@
+from django import template
 from django.shortcuts import get_list_or_404, render
 import datetime
 # Create your views here.
@@ -58,4 +59,17 @@ class DayView(TemplateView):
             context['oldest'] = False
         # データベースからオブジェクトの取得
         context['timedata_list'] = get_list_or_404(TimeData.objects.filter(tm__year=kwargs['year'], tm__month=kwargs['month'], tm__day=kwargs['day']))
+        return render(self.request, self.template_name, context)
+
+
+class UploadView(TemplateView):
+    template_name = "upload.html"
+    # アスタリスク1つ：可変長引数(タプル型)
+    # アスタリスク2つ：辞書型引数
+
+    def get(self, request, *args, **kwargs):
+        context = super(UploadView, self).get_context_data(**kwargs)
+        context['year'] = datetime.datetime.now().year
+        context['month'] = datetime.datetime.now().month
+        context['day'] = datetime.datetime.now().day
         return render(self.request, self.template_name, context)
