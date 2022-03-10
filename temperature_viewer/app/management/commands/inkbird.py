@@ -1,6 +1,6 @@
 from bluepy import btle
 import binascii
-import datetime
+from django.utils import timezone
 import time
 import ambient
 import os
@@ -35,7 +35,7 @@ class Inkbird:
 
     def get_data(self):
         # 時間取得
-        self.t = datetime.datetime.now()
+        self.t = timezone.datetime.now()
         # データ取得
         try:
             # peripheral

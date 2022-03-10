@@ -10,7 +10,7 @@ class TimeData(models.Model):
     # 気温
     temperature = models.FloatField(null=True, blank=True)
     # 湿度
-    humidity = models.IntegerField(null=True, blank=True)
+    humidity = models.FloatField(null=True, blank=True)
     # 外部プローブ
     is_external = models.BooleanField(null=True, blank=True)
     # バッテリーの残量
@@ -27,10 +27,12 @@ class DayData(models.Model):
     temperature_max = models.ForeignKey(TimeData, null=True, blank=True, on_delete=models.SET_NULL, related_name='temperature_max')
     # 平均気温
     temperature_ave = models.FloatField(null=True, blank=True)
-    # 平均湿度
-    humidity_ave = models.IntegerField(null=True, blank=True)
     # 最低湿度
     humidity_min = models.ForeignKey(TimeData, null=True, blank=True, on_delete=models.SET_NULL, related_name='humidity_min')
+    # 最低湿度
+    humidity_max = models.ForeignKey(TimeData, null=True, blank=True, on_delete=models.SET_NULL, related_name='humidity_max')
+    # 平均湿度
+    humidity_ave = models.FloatField(null=True, blank=True)
     # 天気
     weather = models.CharField(null=True, blank=True, max_length=50)
 

@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load datetime_calculation %}
+{% load average %}
 {% comment %} ナビゲーションバー {% endcomment %}
 {% block nav %}
   {% comment %} 前日 {% endcomment %}
@@ -38,61 +39,102 @@
 {% endblock nav %}
 {% block free %}
   {% comment %} 一覧 {% endcomment %}
-  <table id="table_main" class="table table-striped table-hover table-bordered">
-    <thead>
-      <tr>
-        <th style="width:20%">時刻</th>
-        <th style="width:20%">気温(℃)</th>
-        <th style="width:20%">湿度(%)</th>
-        <th style="width:20%">外部プローブ</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for timedata in timedata_list|dictsort:"tm" %}
-      <tr>
-        <td>{{timedata.tm|time:"H:i"}}</td>
-        <td>{{timedata.temperature|floatformat:1}}</td>
-        <td>{{timedata.humidity|floatformat:0}}</td>
-        <td>{% if timedata.is_external %}〇{% else %}✕{% endif %}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% comment %} 要約 {% endcomment %}
-  {% with timedata_list|dictsort:"temperature"|first as temperature_min %}
-  {% with timedata_list|dictsortreversed:"temperature"|first as temperature_max %}
-    <table class="table table-striped table-hover table-dark h6 mt-2 table-bordered">
+  <div id="div_table_main">
+    <table id="table_main" class="table table-sm table-striped table-hover table-bordered">
       <thead>
-        <th scope="col" style="width:20%"></th>
-        <th scope="col" style="width:20%">気温(℃)</th>
-        <th scope="col" style="width:20%">湿度(%)</th>
-        <th scope="col" style="width:20%">時刻</th>
+        <tr>
+          <th scope="col">時刻</th>
+          <th scope="col">気温(℃)</th>
+          <th scope="col">湿度(%)</th>
+          <th scope="col">外部</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for timedata in timedata_list|dictsort:"tm" %}
+        <tr>
+          <td>{{timedata.tm|time:"H:i"}}</td>
+          <td>{{timedata.temperature|floatformat:1}}</td>
+          <td>{{timedata.humidity|floatformat:0}}</td>
+          <td>{% if timedata.is_external %}O{% else %}X{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  
+  {% comment %} 要約 {% endcomment %}
+  <div id="div_table_summary">
+    {% with timedata_list|dictsort:"temperature"|first as temperature_min %}
+    {% with timedata_list|dictsortreversed:"temperature"|first as temperature_max %}
+    {% with timedata_list|dictsort:"humidity"|first as humidity_min %}
+    {% with timedata_list|dictsortreversed:"humidity"|first as humidity_max %}
+    <table id="table_summary" class="table table-sm table-hover table-dark h6">
+      <thead>
+        <tr>
+          <th scope="col" class="table_summary_border">#</th>
+          <th scope="col" class="table_summary_border">平均値</th>
+          <th scope="col">時刻</th>
+          <th scope="col" class="table_summary_border">最低値</th>
+          <th scope="col">時刻</th>
+          <th scope="col" class="table_summary_border">最高値</th>
+        </tr>
       </thead>
       <tbody>
         <tr>
-          <td scope="row">最低気温</td>
-          <td>{{temperature_min.temperature|floatformat:1}}</td>
-          <td>{{temperature_min.humidity|floatformat:0}}%</td>
+          <td scope="row" class="table_summary_border">気温</td>
+          <td class="table_summary_border">{% average_timedata_temperature timedata_list %}</td>
           <td>{{temperature_min.tm|time:"H:i"}}</td>
+          <td class="table_summary_border">{{temperature_min.temperature|floatformat:1}}</td>
+          <td>{{temperature_max.tm|time:"H:i"}}</td>
+          <td class="table_summary_border">{{temperature_max.temperature|floatformat:1}}</td>
         </tr>
         <tr>
-          <td scope="row">最高気温</td>
-          <td>{{temperature_max.temperature|floatformat:1}}</td>
-          <td>{{temperature_max.humidity|floatformat:0}}%</td>
-          <td>{{temperature_max.tm|time:"H:i"}}</td>
+          <td scope="row" class="table_summary_border">湿度</td>
+          <td class="table_summary_border">{% average_timedata_humidity timedata_list %}%</td>
+          <td>{{humidity_min.tm|time:"H:i"}}</td>
+          <td class="table_summary_border">{{humidity_min.humidity|floatformat:0}}%</td>
+          <td>{{humidity_max.tm|time:"H:i"}}</td>
+          <td class="table_summary_border">{{humidity_max.humidity|floatformat:0}}%</td>
         </tr>
       </tbody>
     </table>
-  {% endwith %}
-  {% endwith %}
-  {% comment %} スクリプト {% endcomment %}
-  <script type="text/javascript">
-    $(document).ready(function(){
-      $('#table_main').DataTable({
-        "paging":false,
-        "info":false,
-        "searching":false
-      });
+    {% endwith %}
+    {% endwith %}
+    {% endwith %}
+    {% endwith %}
+  </div>
+  {% comment %} グラフ {% endcomment %}
+  <div id="graph">
+    <ul class="nav nav-tabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button id="tab_graph_temperature"class="nav-link active" data-bs-toggle="tab" data-bs-target="#graph_temperature" role="tab" aria-controls="graph_temperature" aria-selected="true">気温</a>
+        </li>
+        <li class="nav-item">
+          <button id="tab_graph_humidity"class="nav-link" data-bs-toggle="tab" data-bs-target="#graph_humidity" role="tab" aria-controls="graph_humidity" aria-selected="true">湿度</a>
+          </li>
+        </ul>
+        <div class="tab-content">
+          <div id="graph_temperature" class="tab-pane active" role="tabpanel" aria-labelledby="tab_graph_temperature">
+          {% autoescape off %}
+          {{graph_temperature|safe}}
+          {% endautoescape %}
+        </div>
+        <div id="graph_humidity" class="tab-pane" role="tabpanel" aria-labelledby="tab_graph_humidity">
+          {% autoescape off %}
+          {{graph_humidity|safe}}
+          {% endautoescape %}
+        </div>
+      </div>
+    </div>
+{% comment %} スクリプト {% endcomment %}
+<script type="text/javascript">
+  {% comment %} テーブルソート機能 {% endcomment %}
+  $(document).ready(function(){
+    $('#table_main').DataTable({
+      "paging":false,
+      "info":false,
+      "searching":false
     });
-  </script>
+  });
+</script>
 {% endblock free %}
