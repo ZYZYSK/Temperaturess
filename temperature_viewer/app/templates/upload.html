@@ -51,6 +51,10 @@
     $('#btn_upload').on('click',async function(){
         $('#txt_processing').removeClass('d-none')
         $('#txt_state').addClass('d-none')
+        window.onbeforeunload=function(event){
+            event=event||window.event;
+            event.returnValue='ページから移動しますか？';
+        }
         let form=document.getElementById('form');
         let formdata=new FormData(form);
         let response=await fetch(form.action,{
@@ -58,6 +62,7 @@
             body:formdata
         });
         if(response.ok){
+            window.onbeforeunload=null;
             document.open();
             document.write(await response.text());
             document.close();

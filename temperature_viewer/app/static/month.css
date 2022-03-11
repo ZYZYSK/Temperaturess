@@ -1,0 +1,17 @@
+#div_table_main{
+    min-height: 300px;
+    overflow: scroll;
+}
+#table_main>thead th{
+    position: sticky;
+    top: 0rem;
+    background:white;
+}
+.table_main_col{
+    width:5%;
+}
+#table_summary th,#table_summary td{
+    width:5%;
+    border-right:1px solid white;
+}
+

@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="{% static 'datatables.min.css' %}">
     <link rel="stylesheet" href="{% static 'bootstrap-icons-1.8.1/bootstrap-icons.css' %}">
     <link rel="stylesheet" href="{% static 'base.css' %}">
-    <link rel="stylesheet" href="{% static 'day.css' %}">
+    {% block link %}{% endblock link %}
   </head>
 <body>
   {% comment %} JS {% endcomment %}
