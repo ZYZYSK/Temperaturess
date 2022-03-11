@@ -71,40 +71,40 @@
             <a href={% url 'day' year month data.daydata.day|date:"j" %}>{{data.daydata.day|date:"j"}}</a>
           </th>
           {% comment %} 平均 {% endcomment %}
-          {% if data.daydata.temperature_avg > data.normaldata.temperature_avg_highest %}
-          <td class="table-danger">
-          {% elif data.daydata.temperature_avg > data.normaldata.temperature_avg_high %}
-          <td class="table-warning">
-          {% elif data.daydata.temperature_avg < data.normaldata.temperature_avg_lowest %}
-          <td class="table-primary">
-          {% elif data.daydata.temperature_avg < data.normaldata.temperature_avg_low %}
-          <td class="table-info">
+          {% if data.daydata.temperature_avg >= data.normaldata.temperature_avg_highest %}
+          <td class="bg-danger text-white">
+          {% elif data.daydata.temperature_avg >= data.normaldata.temperature_avg_high %}
+          <td class="bg-warning">
+          {% elif data.daydata.temperature_avg <= data.normaldata.temperature_avg_lowest %}
+          <td class="bg-primary text-white">
+          {% elif data.daydata.temperature_avg <= data.normaldata.temperature_avg_low %}
+          <td class="bg-info">
           {% else %}
           <td>
           {% endif %}
           {{data.daydata.temperature_avg|floatformat:1}}</td>
           {% comment %} 最低 {% endcomment %}
-          {% if data.daydata.temperature_min.temperature > data.normaldata.temperature_min_highest %}
-          <td class="table-danger">
-          {% elif data.daydata.temperature_min.temperature > data.normaldata.temperature_min_high %}
-          <td class="table-warning">
-          {% elif data.daydata.temperature_min.temperature < data.normaldata.temperature_min_lowest %}
-          <td class="table-primary">
-          {% elif data.daydata.temperature_min.temperature < data.normaldata.temperature_min_low %}
-          <td class="table-info">
+          {% if data.daydata.temperature_min.temperature >= data.normaldata.temperature_min_highest %}
+          <td class="bg-danger text-white">
+          {% elif data.daydata.temperature_min.temperature >= data.normaldata.temperature_min_high %}
+          <td class="bg-warning">
+          {% elif data.daydata.temperature_min.temperature <= data.normaldata.temperature_min_lowest %}
+          <td class="bg-primary text-white">
+          {% elif data.daydata.temperature_min.temperature <= data.normaldata.temperature_min_low %}
+          <td class="bg-info">
           {% else %}
           <td>
           {% endif %}
           {{data.daydata.temperature_min.temperature|floatformat:1}}</td>
           {% comment %} 最高 {% endcomment %}
-          {% if data.daydata.temperature_max.temperature > data.normaldata.temperature_max_highest %}
-          <td class="table-danger">
-          {% elif data.daydata.temperature_max.temperature > data.normaldata.temperature_max_high %}
-          <td class="table-warning">
-          {% elif data.daydata.temperature_max.temperature < data.normaldata.temperature_max_lowest %}
-          <td class="table-primary">
-          {% elif data.daydata.temperature_max.temperature < data.normaldata.temperature_max_low %}
-          <td class="table-info">
+          {% if data.daydata.temperature_max.temperature >= data.normaldata.temperature_max_highest %}
+          <td class="bg-danger text-white">
+          {% elif data.daydata.temperature_max.temperature >= data.normaldata.temperature_max_high %}
+          <td class="bg-warning">
+          {% elif data.daydata.temperature_max.temperature <= data.normaldata.temperature_max_lowest %}
+          <td class="bg-primary text-white">
+          {% elif data.daydata.temperature_max.temperature <= data.normaldata.temperature_max_low %}
+          <td class="bg-info">
           {% else %}
           <td>
           {% endif %}
