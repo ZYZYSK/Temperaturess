@@ -1,15 +1,20 @@
+import base64
+import io
+import math
+import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
+import plotly.graph_objects as go
 import datetime
-from multiprocessing.sharedctypes import Value
-from sqlite3 import Time
+from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.db import IntegrityError
+from django.db.models import Avg
 from django.shortcuts import get_list_or_404, render
 from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
 from app.models import *
-from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.utils import timezone
-from django.db.models import Avg
-import plotly.graph_objects as go
+matplotlib.use('Agg')
 # Create your views here.
 
 
@@ -46,15 +51,96 @@ class MonthView(TemplateView):
         # 最古の月かどうか
         object_oldest = DayData.objects.order_by('day').first()
         if object_oldest is not None:
-            context['oldest'] = object_oldest.day.year == kwargs['year'] and object_oldest.day.month == kwargs['month']
+            context['oldest'] = object_oldest.day.year == kwargs['year'] and (object_oldest.day - datetime.timedelta(days=1)).month == kwargs['month']
         else:
             context['oldest'] = False
         # データベースからオブジェクトの取得
         daydatas = get_list_or_404(DayData.objects.filter(day__year=kwargs['year'], day__month=kwargs['month']).order_by('day'))
         normaldatas = get_list_or_404(NormalData.objects.filter(day__month=kwargs['month']).order_by('day'))
         context['datas'] = [{'daydata': t[0], 'normaldata':t[1]} for t in zip(daydatas, normaldatas)]
+        # グラフ描画
+        x = [daydata.day for daydata in daydatas]
+        # 気温
+        y_1_temperature_min = [round(daydata.temperature_min.temperature, 1) for daydata in daydatas]
+        y_1_temperature_max = [round(daydata.temperature_max.temperature, 1) for daydata in daydatas]
+        y_1_temperature_avg = [round(daydata.temperature_avg, 1) for daydata in daydatas]
+        y_1_temperature_normal_min = [round(normaldata.temperature_min, 1) for normaldata in normaldatas[:len(daydatas)]]
+        y_1_temperature_normal_max = [round(normaldata.temperature_max, 1) for normaldata in normaldatas[:len(daydatas)]]
+        y_1_temperature_normal_avg = [round(normaldata.temperature_avg, 1) for normaldata in normaldatas[:len(daydatas)]]
+        context['graph_1_temperature'] = self.graph_1(x, y_1_temperature_min, y_1_temperature_max, y_1_temperature_avg, y_n_min=y_1_temperature_normal_min, y_n_max=y_1_temperature_normal_max, y_n_avg=y_1_temperature_normal_avg)
+        # 湿度
+        y_1_humidity_min = [round(daydata.humidity_min.humidity) for daydata in daydatas]
+        y_1_humidity_max = [round(daydata.humidity_max.humidity) for daydata in daydatas]
+        y_1_humidity_avg = [round(daydata.humidity_avg) for daydata in daydatas]
+        context['graph_1_humidity'] = self.graph_1(x, y_1_humidity_min, y_1_humidity_max, y_1_humidity_avg, dtick=20)
+        # 5日間平均気温
+        y_5_temperature_daydata = []
+        y_5_temperature_normaldata = []
+        for daydata in daydatas:
+            y_5_objects_daydata = DayData.objects.filter(day__range=[daydata.day - datetime.timedelta(days=2), daydata.day + datetime.timedelta(days=2)])
+            y_5_objects_normaldata = NormalData.objects.filter(
+                day__range=[
+                    datetime.date(2000, daydata.day.month, daydata.day.day) - datetime.timedelta(days=2),
+                    datetime.date(2000, daydata.day.month, daydata.day.day) + datetime.timedelta(days=2)])
+            # 5日間平均を計算できないデータは削除
+            if len(y_5_objects_daydata) != 5:
+                x.remove(daydata.day)
+                continue
+            # 計算できる場合
+            y_5_temperature_daydata.append(y_5_objects_daydata.aggregate(Avg('temperature_avg'))['temperature_avg__avg'])
+            y_5_temperature_normaldata.append(y_5_objects_normaldata.aggregate(Avg('temperature_avg'))['temperature_avg__avg'])
+        context['graph_5'] = self.graph_5([xx.day for xx in x], y_5_temperature_daydata, y_5_temperature_normaldata)
+
         # 渡す
         return render(self.request, self.template_name, context)
+
+    def graph_1(self, x: list, y_min: list, y_max: list, y_avg: list, y_n_min: list = None, y_n_max: list = None, y_n_avg: list = None, dtick: int = 1):
+        # 描画
+        fig = go.Figure(data=[
+            go.Scatter(x=x, y=y_min, name="最低", mode='lines+markers', line=dict(color='blue')),
+            go.Scatter(x=x, y=y_max, name="最高", mode='lines+markers', line=dict(color='red')),
+            go.Scatter(x=x, y=y_avg, name="平均", mode='lines+markers', line=dict(color='green')),
+        ])
+        # 平年値
+        if y_n_min is not None and y_n_avg is not None and y_n_max is not None:
+            fig.add_trace(go.Scatter(x=x, y=y_n_min, name="最高(平年)", mode='lines', line=dict(color='black')))
+            fig.add_trace(go.Scatter(x=x, y=y_n_max, name="最低(平年)", mode='lines', line=dict(color='black')))
+            fig.add_trace(go.Scatter(x=x, y=y_n_avg, name="平均(平年)", mode='lines', line=dict(color='black')))
+
+        fig.update_layout(
+            plot_bgcolor="#F5F5F5",
+            xaxis_tickformat='%d日',
+            autosize=True,
+            xaxis=dict(range=(x[0], x[len(x) - 1]), dtick='D1'),
+            yaxis=dict(
+                range=(math.floor(min(y_min)), math.ceil(max(y_max))),
+                dtick=dtick
+            )
+        )
+        fig.update_xaxes(linecolor="black", gridcolor="grey", mirror="allticks", zeroline=False)
+        fig.update_yaxes(linecolor="black", gridcolor="grey", mirror="allticks", zeroline=False)
+        return fig.to_html(include_plotlyjs=False, full_html=False, default_width='90vw')
+
+    def graph_5(self, x: list, y: list, y_normal: list):
+        x = np.array(x)
+        y = np.array(y) - np.array(y_normal)
+        y_normal = np.zeros(len(y))
+        # 描画
+        fig, ax = plt.subplots(1, 1, figsize=(15, 5))
+        ax.set_xlim(x[0], x[len(x) - 1])
+        ax.set_xticks(x)
+        ax.set_yticks(np.arange(math.floor(np.min(y)), math.ceil(np.max(y))))
+        ax.plot(x, y, color="grey")
+        ax.plot(x, y_normal, color="black", linewidth=2)
+        ax.fill_between(x=x, y1=y, y2=y_normal, where=y >= y_normal, facecolor='#fe9696', interpolate=True)
+        ax.fill_between(x, y, y_normal, where=y <= y_normal, facecolor='#9696e6', interpolate=True)
+        ax.grid()
+        # バッファ
+        buffer = io.BytesIO()
+        plt.savefig(buffer, format='png')
+        graph = base64.b64encode(buffer.getvalue())
+        graph = graph.decode('utf-8')
+        return graph
 
 
 class DayView(TemplateView):
@@ -92,7 +178,6 @@ class DayView(TemplateView):
         fig.update_xaxes(linecolor="black", gridcolor="grey", mirror="allticks", zeroline=False)
         fig.update_yaxes(linecolor="black", gridcolor="grey", mirror="allticks", zeroline=False)
         return fig.to_html(include_plotlyjs=False, full_html=False, default_width='90vw')
-        # return plot(fig, output_type='div', include_plotlyjs=False)
 
 
 class UploadView(TemplateView):
@@ -186,8 +271,9 @@ class UploadView(TemplateView):
                 humidity_min = humidity_sorted.first()
                 humidity_max = humidity_sorted.last()
                 humidity_avg = humidity_sorted.aggregate(Avg('humidity'))
+                is_incomplete = temperature_sorted.count() != 288
                 # DBへの登録
-                DayData.objects.create(day=day, temperature_min=temperature_min, temperature_max=temperature_max, temperature_avg=temperature_avg['temperature__avg'], humidity_min=humidity_min, humidity_max=humidity_max, humidity_avg=humidity_avg['humidity__avg'])
+                DayData.objects.create(day=day, temperature_min=temperature_min, temperature_max=temperature_max, temperature_avg=temperature_avg['temperature__avg'], humidity_min=humidity_min, humidity_max=humidity_max, humidity_avg=humidity_avg['humidity__avg'], is_incomplete=is_incomplete)
             # [例外処理]重複エラー
             except IntegrityError:
                 daydata = DayData.objects.filter(day__year=day.year, day__month=day.month, day__day=day.day).first()
@@ -198,6 +284,7 @@ class UploadView(TemplateView):
                 daydata.humidity_min = humidity_min
                 daydata.humidity_max = humidity_max
                 daydata.humidity_avg = humidity_avg['humidity__avg']
+                daydata.is_incomplete = is_incomplete
                 daydata.save()
                 cnt_daydata_changed += 1
             # [例外処理]その他

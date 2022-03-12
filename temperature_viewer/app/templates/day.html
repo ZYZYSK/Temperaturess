@@ -87,11 +87,17 @@
       <tbody>
         <tr>
           <th scope="row" class="table_summary_border">気温</td>
-          <td class="table_summary_border">{% average_timedata_temperature timedatas %}</td>
+          <td class="table_summary_border">{% average_timedata_temperature timedatas %}
+            {% if timedatas|length != 288 %}){% endif %}
+          </td>
           <td>{{temperature_min.tm|time:"H:i"}}</td>
-          <td class="table_summary_border">{{temperature_min.temperature|floatformat:1}}</td>
+          <td class="table_summary_border">{{temperature_min.temperature|floatformat:1}}
+            {% if timedatas|length != 288 %}){% endif %}
+          </td>
           <td>{{temperature_max.tm|time:"H:i"}}</td>
-          <td class="table_summary_border">{{temperature_max.temperature|floatformat:1}}</td>
+          <td class="table_summary_border">{{temperature_max.temperature|floatformat:1}}
+            {% if timedatas|length != 288 %}){% endif %}
+          </td>
         </tr>
         <tr>
           <th scope="row" class="table_summary_border">湿度</td>
@@ -113,24 +119,24 @@
     <ul class="nav nav-tabs" role="tablist">
       <li class="nav-item" role="presentation">
         <button id="tab_graph_temperature"class="nav-link active" data-bs-toggle="tab" data-bs-target="#graph_temperature" role="tab" aria-controls="graph_temperature" aria-selected="true">気温</a>
-        </li>
-        <li class="nav-item">
-          <button id="tab_graph_humidity"class="nav-link" data-bs-toggle="tab" data-bs-target="#graph_humidity" role="tab" aria-controls="graph_humidity" aria-selected="true">湿度</a>
-          </li>
-        </ul>
-        <div class="tab-content">
-          <div id="graph_temperature" class="tab-pane active" role="tabpanel" aria-labelledby="tab_graph_temperature">
-          {% autoescape off %}
-          {{graph_temperature|safe}}
-          {% endautoescape %}
-        </div>
-        <div id="graph_humidity" class="tab-pane" role="tabpanel" aria-labelledby="tab_graph_humidity">
-          {% autoescape off %}
-          {{graph_humidity|safe}}
-          {% endautoescape %}
-        </div>
+      </li>
+      <li class="nav-item">
+        <button id="tab_graph_humidity"class="nav-link" data-bs-toggle="tab" data-bs-target="#graph_humidity" role="tab" aria-controls="graph_humidity" aria-selected="true">湿度</a>
+      </li>
+    </ul>
+    <div class="tab-content">
+      <div id="graph_temperature" class="tab-pane active" role="tabpanel" aria-labelledby="tab_graph_temperature">
+        {% autoescape off %}
+        {{graph_temperature|safe}}
+        {% endautoescape %}
+      </div>
+      <div id="graph_humidity" class="tab-pane" role="tabpanel" aria-labelledby="tab_graph_humidity">
+        {% autoescape off %}
+        {{graph_humidity|safe}}
+        {% endautoescape %}
       </div>
     </div>
+  </div>
 {% comment %} スクリプト {% endcomment %}
 <script type="text/javascript">
   {% comment %} テーブルソート機能 {% endcomment %}

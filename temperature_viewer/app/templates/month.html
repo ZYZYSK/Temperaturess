@@ -68,7 +68,8 @@
         {% for data in datas %}
         <tr>
           <th scope="row">
-            <a href={% url 'day' year month data.daydata.day|date:"j" %}>{{data.daydata.day|date:"j"}}</a>
+            <a href={% url 'day' year month data.daydata.day|date:"j" %}>{{data.daydata.day|date:"j"}}
+            </a>
           </th>
           {% comment %} 平均 {% endcomment %}
           {% if data.daydata.temperature_avg >= data.normaldata.temperature_avg_highest %}
@@ -82,7 +83,8 @@
           {% else %}
           <td>
           {% endif %}
-          {{data.daydata.temperature_avg|floatformat:1}}</td>
+            {{data.daydata.temperature_avg|floatformat:1}}
+          </td>
           {% comment %} 最低 {% endcomment %}
           {% if data.daydata.temperature_min.temperature >= data.normaldata.temperature_min_highest %}
           <td class="bg-danger text-white">
@@ -95,7 +97,8 @@
           {% else %}
           <td>
           {% endif %}
-          {{data.daydata.temperature_min.temperature|floatformat:1}}</td>
+            {{data.daydata.temperature_min.temperature|floatformat:1}}
+          </td>
           {% comment %} 最高 {% endcomment %}
           {% if data.daydata.temperature_max.temperature >= data.normaldata.temperature_max_highest %}
           <td class="bg-danger text-white">
@@ -108,20 +111,34 @@
           {% else %}
           <td>
           {% endif %}
-          {{data.daydata.temperature_max.temperature|floatformat:1}}</td>
+            {{data.daydata.temperature_max.temperature|floatformat:1}}
+          </td>
           {% comment %} その他 {% endcomment %}
-          <td>{{data.daydata.humidity_avg|floatformat:0}}</td>
-          <td>{{data.daydata.humidity_min.humidity|floatformat:0}}</td>
-          <td>{{data.daydata.humidity_max.humidity|floatformat:0}}</td>
-          <td>{{data.daydata.weather}}</td>
-          <td>{{data.normaldata.temperature_avg}}</td>
-          <td>{{data.normaldata.temperature_min}}</td>
-          <td>{{data.normaldata.temperature_max}}</td>
+          <td>{{data.daydata.humidity_avg|floatformat:0}}
+          </td>
+          <td>{{data.daydata.humidity_min.humidity|floatformat:0}}
+          </td>
+          <td>{{data.daydata.humidity_max.humidity|floatformat:0}}
+          </td>
+          <td>
+              {% if data.daydata.is_incomplete %}){% endif %}
+              {{data.daydata.weather}}
+          </td>
+          <td>{{data.normaldata.temperature_avg}}
+
+          </td>
+          <td>{{data.normaldata.temperature_min}}
+
+          </td>
+          <td>{{data.normaldata.temperature_max}}
+
+          </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
+{% comment %} 要約 {% endcomment %}
   <div id="dib_table_summary">
     <table id="table_summary" class="table table-sm table-hover table-bordered">
       <thead>
@@ -140,6 +157,35 @@
         </tr>
       </thead>
     </table>
+  </div>
+{% comment %} グラフ {% endcomment %}
+  <div id="graph">
+    <ul class="nav nav-tabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button id="tab_graph_1_temperature" class="nav-link active" data-bs-toggle="tab" data-bs-target="#graph_1_temperature" role="tab" aria-controls="graph_1_temperature" aria_selected="true">気温</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button id="tab_graph_1_humidity" class="nav-link" data-bs-toggle="tab" data-bs-target="#graph_1_humidity" role="tab" aria-controls="graph_1_humidity" aria_selected="true">湿度</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button id="tab_graph_5" class="nav-link" data-bs-toggle="tab" data-bs-target="#graph_5" role="tab" aria-controls="graph_5" aria_selected="true">5日間平均気温</button>
+      </li>
+    </ul>
+    <div class="tab-content">
+      <div id="graph_1_temperature" class="tab-pane active" role="tabpanel" aria-labelledby="tab_graph_1_temperature">
+        {% autoescape off %}
+        {{graph_1_temperature|safe}}
+        {% endautoescape %}
+      </div>
+      <div id="graph_1_humidity" class="tab-pane" role="tabpanel" aria-labelledby="tab_graph_1_humidity">
+        {% autoescape off %}
+        {{graph_1_humidity|safe}}
+        {% endautoescape %}
+      </div>
+      <div id="graph_5" class="tab-pane" role="tabpanel" aria-labelledby="tab_graph_5">
+        <img class="img-fluid" src="data:img/png;base64,{{graph_5|safe}}" alt="">
+      </div>
+    </div>
   </div>
 {% comment %} スクリプト {% endcomment %}
 <script type="text/javascript">

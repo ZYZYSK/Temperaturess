@@ -1,12 +1,15 @@
+import datetime
+import traceback
+
+from django.db import IntegrityError
+from django.db.models import Avg
 from bluepy import btle
 import binascii
 from django.utils import timezone
-import time
 import ambient
 import os
-from lib2to3.pytree import Base
 from django.core.management.base import BaseCommand
-from models import TimeData
+from ...models import *
 
 # MACアドレス
 MAC_ADDRESS = "D8:A9:8B:75:40:D9"
@@ -18,7 +21,7 @@ WRITE_KEY = "4b49c065ac4682f3"
 # 保存ファイルの場所
 SAVE_PATH = os.path.join(os.path.dirname(__file__), "result.txt")
 # 再試行回数
-RETRY = 5
+RETRY = 10
 
 
 class Inkbird:
@@ -35,18 +38,12 @@ class Inkbird:
 
     def get_data(self):
         # 時間取得
-        self.t = timezone.datetime.now()
-        # データ取得
-        try:
-            # peripheral
-            self.peripheral = btle.Peripheral(self.address)
-            # データ読み取り
-            characteristic = self.peripheral.readCharacteristic(self.handle)
-        except Exception as e:
-            raise e
-        # 切断
-        else:
-            self.peripheral.disconnect
+        self.tm = timezone.datetime.now()
+        # peripheral
+        self.peripheral = btle.Peripheral(self.address)
+        # データ読み取り
+        characteristic = self.peripheral.readCharacteristic(self.handle)
+        self.peripheral.disconnect
         # 気温取得
         temp_hex = binascii.b2a_hex(bytes([characteristic[1]])) + binascii.b2a_hex(
             bytes([characteristic[0]])
@@ -65,22 +62,63 @@ class Inkbird:
         self.is_external = int(is_external_hex, 16)
 
     def save(self):
-        # DBに保存
-        TimeData.objects.create(tm=self.t, temperature=self.temp, humidity=self.humid, is_external=bool(self.is_external))
+        # TimeData
+        try:
+            # DBに保存
+            TimeData.objects.create(tm=self.tm, temperature=self.temp, humidity=self.humid, is_external=bool(self.is_external))
+        # [例外処理]重複エラー
+        except IntegrityError:
+            pass
+        # [例外処理]エラー
+        except Exception:
+            self.error_log()
+        # DayData
+        if self.tm.hour == 0 and self.tm.minute == 0:
+            try:
+                # 作成
+                day = datetime.datetime.date(self.tm - datetime.timedelta(days=1))
+                temperature_sorted = TimeData.objects.filter(tm__year=day.year, tm__month=day.month, tm__day=day.day).order_by('temperature')
+                humidity_sorted = TimeData.objects.filter(tm__year=day.year, tm__month=day.month, tm__day=day.day).order_by('humidity')
+                temperature_min = temperature_sorted.first()
+                temperature_max = temperature_sorted.last()
+                temperature_avg = temperature_sorted.aggregate(Avg('temperature'))
+                humidity_min = humidity_sorted.first()
+                humidity_max = humidity_sorted.last()
+                humidity_avg = humidity_sorted.aggregate(Avg('humidity'))
+                is_incomplete = temperature_sorted.count() != 288
+                # DBへの登録
+                DayData.objects.create(day=day, temperature_min=temperature_min, temperature_max=temperature_max, temperature_avg=temperature_avg['temperature__avg'], humidity_min=humidity_min, humidity_max=humidity_max, humidity_avg=humidity_avg['humidity__avg'], is_incomplete=is_incomplete)
+            # [例外処理]重複エラー
+            except IntegrityError:
+                daydata = DayData.objects.filter(day__year=day.year, day__month=day.month, day__day=day.day).first()
+                daydata.day = day
+                daydata.temperature_min = temperature_min
+                daydata.temperature_max = temperature_max
+                daydata.temperature_avg = temperature_avg['temperature__avg']
+                daydata.humidity_min = humidity_min
+                daydata.humidity_max = humidity_max
+                daydata.humidity_avg = humidity_avg['humidity__avg']
+                daydata.is_incomplete = is_incomplete
+                daydata.save()
+            # [例外処理]エラー
+            except Exception:
+                self.error_log()
 
     def upload_ambient(self):
         # データアップロード
         data = {
             "d1": self.t.strftime("%Y%m%d%H%M"),
-            "d2": self.temp,
+            "d2": self.tmemp,
             "d3": self.humid,
             "d4": self.is_external,
         }
         am = ambient.Ambient(self.channel_id, self.write_key)
-        try:
-            am.send(data)
-        except Exception as e:
-            raise e
+        am.send(data)
+
+    def error_log(self):
+        # ログを記述
+        with open(f"error-{timezone.datetime.now().strftime('%Y_%m_%d_%H%M%S')}.log", mode='a') as f:
+            traceback.print_exc(file=f)
 
 
 class Command(BaseCommand):
@@ -88,23 +126,26 @@ class Command(BaseCommand):
         app = Inkbird(MAC_ADDRESS, HANDLE, CHANNEL_ID, WRITE_KEY, SAVE_PATH)
         # データ取得
         for _ in range(RETRY):
+            # データ取得
             try:
                 app.get_data()
             # エラー
             except Exception as e:
-                print(e)
+                print(f'{e.__class__.__name__}: {e}')
+                app.error_log()
                 continue
             # 成功
             else:
                 # DBに保存
                 app.save()
-                # アップロード
                 for _ in range(RETRY):
+                    # アップロード
                     try:
                         app.upload_ambient()
                     # エラー
                     except Exception as e:
-                        print(e)
+                        print(f'{e.__class__.__name__}: {e}')
+                        app.error_log()
                         continue
                     # 成功
                     else:

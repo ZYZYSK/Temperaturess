@@ -36,6 +36,9 @@ class DayData(models.Model):
     # 天気
     weather = models.CharField(null=True, blank=True, max_length=50)
 
+    # データ件数がすべてそろっていないかどうか
+    is_incomplete = models.BooleanField(default=True)
+
 
 # 平年値
 class NormalData(models.Model):
