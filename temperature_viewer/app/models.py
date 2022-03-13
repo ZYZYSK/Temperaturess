@@ -34,7 +34,7 @@ class DayData(models.Model):
     # 平均湿度
     humidity_avg = models.FloatField(null=True, blank=True)
     # 天気
-    weather = models.CharField(null=True, blank=True, max_length=50)
+    weather = models.CharField(max_length=50, default='')
 
     # データ件数がすべてそろっていないかどうか
     is_incomplete = models.BooleanField(default=True)

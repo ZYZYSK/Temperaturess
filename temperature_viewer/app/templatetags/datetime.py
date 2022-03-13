@@ -1,5 +1,4 @@
 from django import template
-from django.utils import timezone
 import datetime
 from dateutil.relativedelta import relativedelta
 register = template.Library()

@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
-{% load datetime_calculation %}
-{% load average %}
+{% load datetime %}
+{% load exists %}
+{% load timedata %}
 {% comment %} リンク {% endcomment %}
 {% block link %}
     <link rel="stylesheet" href="{% static 'day.css' %}">
@@ -12,34 +13,35 @@
   {% previous_year year month day as previous_year%}
   {% previous_month year month day as previous_month%}
   {% previous_day year month day as previous_day%}
+  {% exist_day previous_year previous_month previous_day as exist_day_previous %}
   <li class="nav-item ms-3 ms-sm-0 me-sm-3">
-    {% comment %} 最古の日付の場合 {% endcomment %}
-    {% if oldest %}
-      <a class="nav-link disabled" disabled="true"><前日</a>
-    {% comment %} それ以外の場合 {% endcomment %}
+    {% comment %} 前日のデータが存在する場合 {% endcomment %}
+    {% if exist_day_previous %}
+    <a href={% url 'day' previous_year previous_month previous_day %} class="nav-link">
+    {% comment %} 存在しない場合 {% endcomment %}
     {% else %}
-      <a href={% url 'day' previous_year previous_month previous_day%} class="nav-link"><前日</a>
+    <a class="nav-link disabled">
     {% endif %}
+    <前日</a>
   </li>
   {% comment %} 今日の日付 {% endcomment %}
   <li class="nav_item ms-3 ms-sm-0 mt-2">
     <span class="navbar-brand h1">{{year}} 年 {{month}} 月 {{day}} 日</span>
   </li>
   {% comment %} 翌日 {% endcomment %}
-  {% now "Y" as current_year%}
-  {% now "n" as current_month%}
-  {% now "j" as current_day%}
   {% next_year year month day as next_year%}
   {% next_month year month day as next_month%}
   {% next_day year month day as next_day%}
+  {% exist_day next_year next_month next_day as exist_day_next %}
   <li class="nav-item ms-3 ms-sm-1">
-    {% comment %} 最新の日付の場合 {% endcomment %}
-    {% if year|stringformat:"s" == current_year and month|stringformat:"s" == current_month and day|stringformat:"s" == current_day%}
-      <a  class="nav-link disabled">翌日></a>
-    {% comment %} それ以外 {% endcomment %}
+    {% comment %} 翌日のデータが存在する場合 {% endcomment %}
+    {% if exist_day_next %}
+    <a href={% url 'day' next_year next_month next_day %} class="nav-link">
+      {% comment %} それ以外 {% endcomment %}
     {% else %}
-      <a href={% url 'day' next_year next_month next_day%} class="nav-link">翌日></a>
+    <a  class="nav-link disabled">
     {% endif %}
+    翌日></a>
   </li>
 {% endblock nav %}
 {% block free %}
@@ -49,7 +51,7 @@
       <thead>
         <tr>
           <th class="table_main_th" scope="col">時刻</th>
-          <th class="table_main_th" scope="col">気温(℃)</th>
+          <th class="table_main_th" scope="col">気温(°C)</th>
           <th class="table_main_th" scope="col">湿度(%)</th>
           <th class="table_main_th" scope="col">外部</th>
         </tr>
@@ -69,10 +71,6 @@
   
   {% comment %} 要約 {% endcomment %}
   <div id="div_table_summary">
-    {% with timedatas|dictsort:"temperature"|first as temperature_min %}
-    {% with timedatas|dictsortreversed:"temperature"|first as temperature_max %}
-    {% with timedatas|dictsort:"humidity"|first as humidity_min %}
-    {% with timedatas|dictsortreversed:"humidity"|first as humidity_max %}
     <table id="table_summary" class="table table-sm table-hover table-dark h6">
       <thead>
         <tr>
@@ -86,33 +84,50 @@
       </thead>
       <tbody>
         <tr>
-          <th scope="row" class="table_summary_border">気温</td>
-          <td class="table_summary_border">{% average_timedata_temperature timedatas %}
+          <th scope="row" class="table_summary_border">
+            気温(°C)
+          </th>
+          <td class="table_summary_border">
+            {{timedatas|average_temperature|floatformat:1}}
             {% if timedatas|length != 288 %}){% endif %}
           </td>
-          <td>{{temperature_min.tm|time:"H:i"}}</td>
-          <td class="table_summary_border">{{temperature_min.temperature|floatformat:1}}
+          <td>
+            {{timedatas|min_temperature:0|time:"H:i"}}
+          </td>
+          <td class="table_summary_border">
+            {{timedatas|min_temperature|floatformat:1}}
             {% if timedatas|length != 288 %}){% endif %}
           </td>
-          <td>{{temperature_max.tm|time:"H:i"}}</td>
-          <td class="table_summary_border">{{temperature_max.temperature|floatformat:1}}
+          <td>
+            {{timedatas|max_temperature:0|time:"H:i"}}
+          </td>
+          <td class="table_summary_border">
+            {{timedatas|max_temperature|floatformat:1}}
             {% if timedatas|length != 288 %}){% endif %}
           </td>
         </tr>
         <tr>
-          <th scope="row" class="table_summary_border">湿度</td>
-          <td class="table_summary_border">{% average_timedata_humidity timedatas %}%</td>
-          <td>{{humidity_min.tm|time:"H:i"}}</td>
-          <td class="table_summary_border">{{humidity_min.humidity|floatformat:0}}%</td>
-          <td>{{humidity_max.tm|time:"H:i"}}</td>
-          <td class="table_summary_border">{{humidity_max.humidity|floatformat:0}}%</td>
+          <th scope="row" class="table_summary_border">
+            湿度(%)
+          </th>
+          <td class="table_summary_border">
+            {{timedatas|average_humidity|floatformat:0}}
+          </td>
+          <td>
+            {{timedatas|min_humidity:0|time:"H:i"}}
+          </td>
+          <td class="table_summary_border">
+            {{timedatas|min_humidity|floatformat:0}}
+          </td>
+          <td>
+            {{timedatas|max_humidity:0|time:"H:i"}}
+          </td>
+          <td class="table_summary_border">
+            {{timedatas|max_humidity|floatformat:0}}
+          </td>
         </tr>
       </tbody>
     </table>
-    {% endwith %}
-    {% endwith %}
-    {% endwith %}
-    {% endwith %}
   </div>
   {% comment %} グラフ {% endcomment %}
   <div id="graph">

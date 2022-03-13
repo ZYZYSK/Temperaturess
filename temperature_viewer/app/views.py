@@ -21,7 +21,7 @@ matplotlib.use('Agg')
 def view_index(request):
     # 最新の年月にジャンプ
     tm_current = timezone.datetime.now()
-    return redirect(f'{tm_current.year}/{tm_current.month}/{tm_current.day}')
+    return redirect(f'{tm_current.year}/{tm_current.month}')
 
 
 class YearView(TemplateView):
@@ -31,9 +31,12 @@ class YearView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = super(YearView, self).get_context_data(**kwargs)
-        # データベースからオブジェクトの取得
-        context['daydatas'] = get_list_or_404(DayData.objects.filter(day__year=kwargs['year']))
-        context['normaldatas'] = get_list_or_404(NormalData.objects.all())
+        # 年月日を個別に渡す
+        context['year'] = kwargs['year']
+        context['month'] = 1
+        context['day'] = 1
+        # グラフ描画
+
         return render(self.request, self.template_name, context)
 
 
@@ -48,15 +51,10 @@ class MonthView(TemplateView):
         context['year'] = kwargs['year']
         context['month'] = kwargs['month']
         context['day'] = 1
-        # 最古の月かどうか
-        object_oldest = DayData.objects.order_by('day').first()
-        if object_oldest is not None:
-            context['oldest'] = object_oldest.day.year == kwargs['year'] and (object_oldest.day - datetime.timedelta(days=1)).month == kwargs['month']
-        else:
-            context['oldest'] = False
         # データベースからオブジェクトの取得
         daydatas = get_list_or_404(DayData.objects.filter(day__year=kwargs['year'], day__month=kwargs['month']).order_by('day'))
         normaldatas = get_list_or_404(NormalData.objects.filter(day__month=kwargs['month']).order_by('day'))
+        # zip
         context['datas'] = [{'daydata': t[0], 'normaldata':t[1]} for t in zip(daydatas, normaldatas)]
         # グラフ描画
         x = [daydata.day for daydata in daydatas]
@@ -138,6 +136,7 @@ class MonthView(TemplateView):
         # バッファ
         buffer = io.BytesIO()
         plt.savefig(buffer, format='png')
+        plt.close()
         graph = base64.b64encode(buffer.getvalue())
         graph = graph.decode('utf-8')
         return graph
@@ -154,18 +153,13 @@ class DayView(TemplateView):
         context['year'] = kwargs['year']
         context['month'] = kwargs['month']
         context['day'] = kwargs['day']
-        # 最古の日付かどうか
-        object_oldest = DayData.objects.order_by('day').first()
-        if object_oldest is not None:
-            context['oldest'] = object_oldest.day.year == kwargs['year'] and object_oldest.day.month == kwargs['month'] and object_oldest.day.day == kwargs['day']
-        else:
-            context['oldest'] = False
         # データベースからオブジェクトの取得
-        context['timedatas'] = get_list_or_404(TimeData.objects.filter(tm__year=kwargs['year'], tm__month=kwargs['month'], tm__day=kwargs['day']))
+        timedatas = get_list_or_404(TimeData.objects.filter(tm__year=kwargs['year'], tm__month=kwargs['month'], tm__day=kwargs['day']))
+        context['timedatas'] = timedatas
         # グラフ描画
-        x = [timezone.localtime(data.tm) for data in context['timedatas']]
-        y_temperature = [round(data.temperature, 1) for data in context['timedatas']]
-        y_humidity = [round(data.humidity, 0) for data in context['timedatas']]
+        x = [timezone.localtime(data.tm) for data in timedatas]
+        y_temperature = [round(data.temperature, 1) for data in timedatas]
+        y_humidity = [round(data.humidity, 0) for data in timedatas]
         context['graph_temperature'] = self.graph(x, y_temperature)
         context['graph_humidity'] = self.graph(x, y_humidity)
         # 渡す

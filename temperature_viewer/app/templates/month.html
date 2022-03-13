@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
-{% load datetime_calculation %}
-{% load average %}
+{% load datetime %}
+{% load exists %}
+{% load daydata_month %}
 {% comment %} リンク{% endcomment %}
 {% block link %}
     <link rel="stylesheet" href="{% static 'month.css' %}">
@@ -12,31 +13,31 @@
   {% previous_year year month as previous_year%}
   {% previous_month year month as previous_month%}
   <li class="nav-item ms-3 ms-sm-0 me-sm-3">
-    {% comment %} 最古の日付の場合 {% endcomment %}
-    {% if oldest %}
-      <a class="nav-link disabled" disabled="true"><前月</a>
-    {% comment %} それ以外の場合 {% endcomment %}
+    {% comment %} 前月のデータが存在する場合 {% endcomment %}
+    {% if previous_year|exist_month:previous_month %}
+    <a href={% url 'month' previous_year previous_month %} class="nav-link">
+    {% comment %} 存在しない場合 {% endcomment %}
     {% else %}
-      <a href={% url 'month' previous_year previous_month %} class="nav-link"><前月</a>
+    <a class="nav-link disabled">
     {% endif %}
+    <前月</a>
   </li>
   {% comment %} 今月 {% endcomment %}
   <li class="nav_item ms-3 ms-sm-0 mt-2">
     <span class="navbar-brand h1">{{year}} 年 {{month}} 月</span>
   </li>
   {% comment %} 翌月 {% endcomment %}
-  {% now "Y" as current_year%}
-  {% now "n" as current_month%}
   {% next_year year month as next_year%}
   {% next_month year month as next_month%}
   <li class="nav-item ms-3 ms-sm-1">
-    {% comment %} 最新の日付の場合 {% endcomment %}
-    {% if year|stringformat:"s" == current_year and month|stringformat:"s" == current_month %}
-      <a  class="nav-link disabled">翌月></a>
-    {% comment %} それ以外 {% endcomment %}
+    {% comment %} 翌月のデータが存在する場合 {% endcomment %}
+    {% if next_year|exist_month:next_month %}
+    <a href={% url 'month' next_year next_month %} class="nav-link">
+    {% comment %} 存在しない場合 {% endcomment %}
     {% else %}
-      <a href={% url 'month' next_year next_month %} class="nav-link">翌月></a>
+    <a class="nav-link disabled">
     {% endif %}
+    翌月></a>
   </li>
 {% endblock nav %}
 
@@ -46,8 +47,8 @@
     <table id="table_main" class="table table-sm table-hover table-bordered">
       <thead>
         <tr>
-          <th class="table_main_col" scope="col" rowspan="2">日付</th>
-          <th scope="col" colspan="3">気温(C)</th>
+          <th class="table_main_col" scope="col" rowspan="2">日</th>
+          <th scope="col" colspan="3">気温(°C)</th>
           <th scope="col" colspan="3">湿度(%)</th>
           <th class="table_main_col" scope="col" rowspan="2">備考</th>
           <th scope="col" colspan="3">平年気温(C)</th>
@@ -144,16 +145,16 @@
       <thead>
         <tr>
           <th scope="row">平均</th>
-          <td>{% average_daydata_temperature_avg datas %}</td>
-          <td>{% average_daydata_temperature_min datas %}</td>
-          <td>{% average_daydata_temperature_max datas %}</td>
-          <td>{% average_daydata_humidity_avg datas %}</td>
-          <td>{% average_daydata_humidity_min datas %}</td>
-          <td>{% average_daydata_humidity_max datas %}</td>
+          <td>{{ datas|average_day_temperature_avg|floatformat:1 }}</td>
+          <td>{{ datas|average_day_temperature_min|floatformat:1 }}</td>
+          <td>{{ datas|average_day_temperature_max|floatformat:1 }}</td>
+          <td>{{ datas|average_day_humidity_avg|floatformat:0 }}</td>
+          <td>{{ datas|average_day_humidity_min|floatformat:0 }}</td>
+          <td>{{ datas|average_day_humidity_max|floatformat:0 }}</td>
           <td></td>
-          <td>{% average_normaldata_temperature_avg datas %}</td>
-          <td>{% average_normaldata_temperature_min datas %}</td>
-          <td>{% average_normaldata_temperature_max datas %}</td>
+          <td>{{ datas|average_normal_temperature_avg|floatformat:1 }}</td>
+          <td>{{ datas|average_normal_temperature_min|floatformat:1 }}</td>
+          <td>{{ datas|average_normal_temperature_max|floatformat:1 }}</td>
         </tr>
       </thead>
     </table>
