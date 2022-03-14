@@ -39,6 +39,7 @@ class Inkbird:
     def get_data(self):
         # 時間取得
         self.tm = timezone.datetime.now()
+        self.tm = timezone.make_aware(self.tm)
         # peripheral
         self.peripheral = btle.Peripheral(self.address)
         # データ読み取り
@@ -107,7 +108,7 @@ class Inkbird:
     def upload_ambient(self):
         # データアップロード
         data = {
-            "d1": self.t.strftime("%Y%m%d%H%M"),
+            "d1": self.tm.strftime("%Y%m%d%H%M"),
             "d2": self.tmemp,
             "d3": self.humid,
             "d4": self.is_external,
