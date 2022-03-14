@@ -109,7 +109,7 @@ class Inkbird:
         # データアップロード
         data = {
             "d1": self.tm.strftime("%Y%m%d%H%M"),
-            "d2": self.tmemp,
+            "d2": self.temp,
             "d3": self.humid,
             "d4": self.is_external,
         }
