@@ -117,8 +117,9 @@ class Inkbird:
         am.send(data)
 
     def error_log(self):
+        os.makedirs('logs', exist_ok=True)
         # ログを記述
-        with open(f"error-{timezone.datetime.now().strftime('%Y_%m_%d_%H%M%S')}.log", mode='a') as f:
+        with open(f"logs/error-{timezone.datetime.now().strftime('%Y_%m_%d_%H%M%S')}.log", mode='a') as f:
             traceback.print_exc(file=f)
 
 

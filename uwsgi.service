@@ -1,0 +1,14 @@
+[Unit]
+Description = uWSGI
+After = syslog.target
+
+[Service]
+ExecStart = /home/pi/temperature_viewer/bin/uwsgi --ini /home/pi/Temperature-Viewer/uwsgi.ini
+Restart=always
+KillSignal=SIGQUIT
+Type=notify
+StandardError=syslog
+NotifyAccess=all
+
+[Install]
+WantedBy=multi-user.target
