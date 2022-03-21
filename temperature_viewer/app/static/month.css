@@ -2,9 +2,9 @@
     min-height: 300px;
     overflow: scroll;
 }
-#table_main>thead th{
+#table_main .table_summary{
     position: sticky;
-    top: 0rem;
+    bottom: 0rem;
     background:white;
 }
 .table_main_col{

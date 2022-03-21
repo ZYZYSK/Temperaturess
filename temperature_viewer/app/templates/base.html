@@ -46,6 +46,12 @@
             <li class="nav-item ms-3 ms-sm-0">
               <a class="nav-link" href={% url 'day' year month day %}>日</a>
             </li>
+            <li class="nav-item ms-3 ms-sm-0">
+              {% now "Y" as now_year %}
+              {% now "n" as now_month %}
+              {% now "j" as now_day %}
+              <a class="nav-link" href={% url 'day' now_year now_month now_day %}>今日</a>
+            </li>
             <li class="nav-item mt-2 ms-3">
               <a href={% url 'upload' %}>
                 <i class="bi-upload" role="img" aria-label="Upload" style="color:white;"></i>

@@ -137,24 +137,19 @@
         </tr>
         {% endfor %}
       </tbody>
-    </table>
-  </div>
-{% comment %} 要約 {% endcomment %}
-  <div id="dib_table_summary">
-    <table id="table_summary" class="table table-sm table-hover table-bordered">
       <thead>
         <tr>
-          <th scope="row">平均</th>
-          <td>{{ datas|average_day_temperature_avg|floatformat:1 }}</td>
-          <td>{{ datas|average_day_temperature_min|floatformat:1 }}</td>
-          <td>{{ datas|average_day_temperature_max|floatformat:1 }}</td>
-          <td>{{ datas|average_day_humidity_avg|floatformat:0 }}</td>
-          <td>{{ datas|average_day_humidity_min|floatformat:0 }}</td>
-          <td>{{ datas|average_day_humidity_max|floatformat:0 }}</td>
-          <td></td>
-          <td>{{ datas|average_normal_temperature_avg|floatformat:1 }}</td>
-          <td>{{ datas|average_normal_temperature_min|floatformat:1 }}</td>
-          <td>{{ datas|average_normal_temperature_max|floatformat:1 }}</td>
+          <th scope="row" class="table_summary">平均</th>
+          <td class="table_summary">{{ datas|average_day_temperature_avg|floatformat:1 }}</td>
+          <td class="table_summary">{{ datas|average_day_temperature_min|floatformat:1 }}</td>
+          <td class="table_summary">{{ datas|average_day_temperature_max|floatformat:1 }}</td>
+          <td class="table_summary">{{ datas|average_day_humidity_avg|floatformat:0 }}</td>
+          <td class="table_summary">{{ datas|average_day_humidity_min|floatformat:0 }}</td>
+          <td class="table_summary">{{ datas|average_day_humidity_max|floatformat:0 }}</td>
+          <td class="table_summary"></td>
+          <td class="table_summary">{{ datas|average_normal_temperature_avg|floatformat:1 }}</td>
+          <td class="table_summary">{{ datas|average_normal_temperature_min|floatformat:1 }}</td>
+          <td class="table_summary">{{ datas|average_normal_temperature_max|floatformat:1 }}</td>
         </tr>
       </thead>
     </table>
