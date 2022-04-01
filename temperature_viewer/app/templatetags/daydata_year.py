@@ -110,26 +110,26 @@ def average_humidity_avg(year: int, month: int = 0):
 
 @register.filter
 def average_humidity_min(year: int, month: int = 0):
-    # 最低湿度の最小値
+    # 最低湿度の平均値
     if month == 0:
         objects = DayData.objects.filter(day__year=year).values('humidity_min__humidity')
     else:
         objects = DayData.objects.filter(day__year=year, day__month=month).values('humidity_min')
     if objects.count():
-        return objects.aggregate(Min('humidity_min__humidity'))['humidity_min__humidity__min']
+        return objects.aggregate(Avg('humidity_min__humidity'))['humidity_min__humidity__avg']
     else:
         return ''
 
 
 @register.filter
 def average_humidity_max(year: int, month: int = 0):
-    # 最高湿度の最大値
+    # 最高湿度の平均値
     if month == 0:
         objects = DayData.objects.filter(day__year=year).values('humidity_max__humidity')
     else:
         objects = DayData.objects.filter(day__year=year, day__month=month).values('humidity_max')
     if objects.count():
-        return objects.aggregate(Max('humidity_max__humidity'))['humidity_max__humidity__max']
+        return objects.aggregate(Avg('humidity_max__humidity'))['humidity_max__humidity__avg']
     else:
         return ''
 

@@ -52,6 +52,13 @@ class MonthView(TemplateView):
         context['month'] = kwargs['month']
         context['day'] = 1
         # データベースからオブジェクトの取得
+        if datetime.date.today().year == context['year'] and datetime.date.today().month == context['month'] and datetime.date.today().day == 1:
+            # 今日が1日の場合に、今月のデータを取得することはできない
+            if context['month'] == 1:
+                return redirect('month', year=context['year'] - 1, month=12)
+            else:
+                return redirect('month', year=context['year'], month=context['month'] - 1)
+
         daydatas = get_list_or_404(DayData.objects.filter(day__year=kwargs['year'], day__month=kwargs['month']).order_by('day'))
         normaldatas = get_list_or_404(NormalData.objects.filter(day__month=kwargs['month']).order_by('day'))
         # zip
