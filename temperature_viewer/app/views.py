@@ -132,14 +132,16 @@ class MonthView(TemplateView):
         y_normal = np.zeros(len(y))
         # 描画
         fig, ax = plt.subplots(1, 1, figsize=(15, 5))
-        ax.set_xlim(x[0], x[len(x) - 1])
-        ax.set_xticks(x)
-        ax.set_yticks(np.arange(math.floor(np.min(y)), math.ceil(np.max(y))))
-        ax.plot(x, y, color="grey")
-        ax.plot(x, y_normal, color="black", linewidth=2)
-        ax.fill_between(x=x, y1=y, y2=y_normal, where=y >= y_normal, facecolor='#fe9696', interpolate=True)
-        ax.fill_between(x, y, y_normal, where=y <= y_normal, facecolor='#9696e6', interpolate=True)
-        ax.grid()
+        # 描画できるデータがある場合のみ描画
+        if len(x) and len(y):
+            ax.set_xlim(x[0], x[len(x) - 1])
+            ax.set_xticks(x)
+            ax.set_yticks(np.arange(math.floor(np.min(y)), math.ceil(np.max(y))))
+            ax.plot(x, y, color="grey")
+            ax.plot(x, y_normal, color="black", linewidth=2)
+            ax.fill_between(x=x, y1=y, y2=y_normal, where=y >= y_normal, facecolor='#fe9696', interpolate=True)
+            ax.fill_between(x, y, y_normal, where=y <= y_normal, facecolor='#9696e6', interpolate=True)
+            ax.grid()
         # バッファ
         buffer = io.BytesIO()
         plt.savefig(buffer, format='png')
