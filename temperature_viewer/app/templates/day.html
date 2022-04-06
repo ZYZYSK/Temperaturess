@@ -57,7 +57,7 @@
         </tr>
       </thead>
       <tbody>
-        {% for timedata in timedatas|dictsort:"tm" %}
+        {% for timedata in timedatas %}
         <tr>
           <th scope="row">{{timedata.tm|time:"H:i"}}</th>
           <td>{{timedata.temperature|floatformat:1}}</td>
@@ -68,7 +68,7 @@
       </tbody>
     </table>
   </div>
-  
+
   {% comment %} 要約 {% endcomment %}
   <div id="div_table_summary">
     <table id="table_summary" class="table table-sm table-hover table-dark h6">
@@ -159,7 +159,8 @@
     $('#table_main').DataTable({
       "paging":false,
       "info":false,
-      "searching":false
+      "searching":false,
+      "order":[[0,'desc']]
     });
   });
 </script>
