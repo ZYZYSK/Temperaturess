@@ -1,4 +1,5 @@
 import base64
+from difflib import context_diff
 import io
 import math
 import calendar
@@ -10,7 +11,7 @@ import datetime
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.db import IntegrityError
 from django.db.models import Avg
-from django.shortcuts import get_list_or_404, render
+from django.shortcuts import get_object_or_404, get_list_or_404, render
 from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
 from app.models import *
@@ -468,3 +469,31 @@ class UploadView(TemplateView):
             else:
                 cnt_normaldata += 1
         return 1, f'{cnt_normaldata}件のNormalDataを作成しました<br>{cnt_normaldata_changed}件のNormalDataを変更しました'
+
+
+class EditWeatherView(TemplateView):
+    template_name = "edit_weather.html"
+    # アスタリスク1つ：可変長引数(タプル型)
+    # アスタリスク2つ：辞書型引数
+
+    def get(self, request, *args, **kwargs):
+        context = super(EditWeatherView, self).get_context_data(**kwargs)
+        # 年月日を個別に渡す
+        context['year'] = kwargs['year']
+        context['month'] = kwargs['month']
+        context['day'] = kwargs['day']
+        # データベースからオブジェクトの取得
+        daydata = get_object_or_404(DayData.objects.filter(day__year=kwargs['year'], day__month=kwargs['month'], day__day=kwargs['day']))
+        context['daydata'] = daydata
+        # 渡す
+        return render(self.request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        context = super(EditWeatherView, self).get_context_data(**kwargs)
+        # データベースからオブジェクトの取得
+        daydata = get_object_or_404(DayData.objects.filter(day__year=context['year'], day__month=context['month'], day__day=context['day']))
+        # データの取得（POST）
+        weather = request.POST.get('weather', "")
+        daydata.weather = weather
+        daydata.save()
+        return redirect('month', context['year'], context['month'])

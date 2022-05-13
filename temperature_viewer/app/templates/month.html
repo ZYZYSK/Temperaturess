@@ -123,7 +123,15 @@
           </td>
           <td>
               {% if data.daydata.is_incomplete %}){% endif %}
-              {{data.daydata.weather}}
+              {% if data.daydata.weather == "" %}
+                <a href={% url 'edit_weather' year month data.daydata.day|date:"j" %}>
+                  追加...
+                </a>
+              {% else %}
+                <a href={% url 'edit_weather' year month data.daydata.day|date:"j" %}>
+                  {{data.daydata.weather}}
+                </a>
+              {% endif %}
           </td>
           <td>{{data.normaldata.temperature_avg}}
 
