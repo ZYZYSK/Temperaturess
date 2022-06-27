@@ -21,7 +21,8 @@ WRITE_KEY = "4b49c065ac4682f3"
 # 保存ファイルの場所
 SAVE_PATH = os.path.join(os.path.dirname(__file__), "result.txt")
 # 再試行回数
-RETRY = 2
+RETRY_BLUETOOTH = 10
+RETRY_NET= 2
 
 
 class Inkbird:
@@ -127,7 +128,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         app = Inkbird(MAC_ADDRESS, HANDLE, CHANNEL_ID, WRITE_KEY, SAVE_PATH)
         # データ取得
-        for _ in range(RETRY):
+        for _ in range(RETRY_BLUETOOTH):
             # データ取得
             try:
                 app.get_data()
@@ -140,7 +141,7 @@ class Command(BaseCommand):
             else:
                 # DBに保存
                 app.save()
-                for _ in range(RETRY):
+                for _ in range(RETRY_NET):
                     # アップロード
                     try:
                         app.upload_ambient()
