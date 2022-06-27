@@ -21,7 +21,7 @@ WRITE_KEY = "4b49c065ac4682f3"
 # 保存ファイルの場所
 SAVE_PATH = os.path.join(os.path.dirname(__file__), "result.txt")
 # 再試行回数
-RETRY = 10
+RETRY = 2
 
 
 class Inkbird:
