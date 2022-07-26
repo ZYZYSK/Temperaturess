@@ -75,8 +75,7 @@ class Inkbird:
         except Exception:
             self.error_log()
         # DayData
-        # if self.tm.hour == 0 and self.tm.minute == 0:
-        if True:
+        if self.tm.hour == 0 and self.tm.minute == 0:
             try:
                 # 作成
                 day = datetime.datetime.date(self.tm - datetime.timedelta(days=1))
