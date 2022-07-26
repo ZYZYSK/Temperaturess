@@ -2,7 +2,7 @@ import datetime
 import traceback
 
 from django.db import IntegrityError
-from django.db.models import Avg
+from django.db.models import Avg, Sum
 from bluepy import btle
 import binascii
 from django.utils import timezone
@@ -22,7 +22,7 @@ WRITE_KEY = "4b49c065ac4682f3"
 SAVE_PATH = os.path.join(os.path.dirname(__file__), "result.txt")
 # 再試行回数
 RETRY_BLUETOOTH = 10
-RETRY_NET= 2
+RETRY_NET = 2
 
 
 class Inkbird:
@@ -50,15 +50,15 @@ class Inkbird:
         temp_hex = binascii.b2a_hex(bytes([characteristic[1]])) + binascii.b2a_hex(
             bytes([characteristic[0]])
         )
-        self.temp = float(int(temp_hex, 16)) / 100
+        self.temperature = float(int(temp_hex, 16)) / 100
         # 負の値の場合
-        if self.temp > 327.67:
-            self.temp -= 655.36
+        if self.temperature > 327.67:
+            self.temperature -= 655.36
         # 湿度取得
         humid_hex = binascii.b2a_hex(bytes([characteristic[3]])) + binascii.b2a_hex(
             bytes([characteristic[2]])
         )
-        self.humid = float(int(humid_hex, 16)) / 100
+        self.humidity = float(int(humid_hex, 16)) / 100
         # 外部プローブが接続されているかどうか
         is_external_hex = binascii.b2a_hex(bytes([characteristic[4]]))
         self.is_external = int(is_external_hex, 16)
@@ -67,7 +67,7 @@ class Inkbird:
         # TimeData
         try:
             # DBに保存
-            TimeData.objects.create(tm=self.tm, temperature=self.temp, humidity=self.humid, is_external=bool(self.is_external))
+            TimeData.objects.create(tm=self.tm, temperature=self.temperature, humidity=self.humidity, is_external=bool(self.is_external))
         # [例外処理]重複エラー
         except IntegrityError:
             pass
@@ -75,31 +75,49 @@ class Inkbird:
         except Exception:
             self.error_log()
         # DayData
-        if self.tm.hour == 0 and self.tm.minute == 0:
+        # if self.tm.hour == 0 and self.tm.minute == 0:
+        if True:
             try:
                 # 作成
                 day = datetime.datetime.date(self.tm - datetime.timedelta(days=1))
-                temperature_sorted = TimeData.objects.filter(tm__year=day.year, tm__month=day.month, tm__day=day.day).order_by('temperature')
-                humidity_sorted = TimeData.objects.filter(tm__year=day.year, tm__month=day.month, tm__day=day.day).order_by('humidity')
-                temperature_min = temperature_sorted.first()
-                temperature_max = temperature_sorted.last()
-                temperature_avg = temperature_sorted.aggregate(Avg('temperature'))
-                humidity_min = humidity_sorted.first()
-                humidity_max = humidity_sorted.last()
-                humidity_avg = humidity_sorted.aggregate(Avg('humidity'))
-                is_incomplete = temperature_sorted.count() != 288
+                timedata_sorted_temperature = TimeData.objects.filter(tm__year=day.year, tm__month=day.month, tm__day=day.day).order_by('temperature')
+                timedata_sorted_humidity = TimeData.objects.filter(tm__year=day.year, tm__month=day.month, tm__day=day.day).order_by('humidity')
+                # 最低気温と最高気温
+                temperature_min = timedata_sorted_temperature.first()
+                temperature_max = timedata_sorted_temperature.last()
+                # 最低湿度と最高湿度
+                humidity_min = timedata_sorted_humidity.first()
+                humidity_max = timedata_sorted_humidity.last()
+                # 平均気温と平均湿度
+                tm_past = datetime.datetime(day.year, day.month, day.day, 0, 0)
+                temperature_sum = timedata_sorted_temperature.aggregate(Sum('temperature'))['temperature__sum']
+                temperature_temp = timedata_sorted_temperature.aggregate(Avg('temperature'))['temperature__avg']
+                humidity_sum = timedata_sorted_humidity.aggregate(Sum('humidity'))['humidity__sum']
+                humidity_temp = timedata_sorted_humidity.aggregate(Avg('humidity'))['humidity__avg']
+                for _ in range(288):
+                    timedata_temp = timedata_sorted_temperature.filter(tm__hour=tm_past.hour, tm__minute=tm_past.minute)
+                    # その時間のデータが存在する場合、一時的に値を記録しておく(初期値はその日の平均値)
+                    if timedata_temp.exists():
+                        temperature_temp = timedata_temp.temperature
+                        humidity_temp = timedata_temp.humidity
+                    # その時間のデータが存在しない場合、前の時刻のデータを使う
+                    else:
+                        temperature_sum += temperature_temp
+                        humidity_sum += humidity_temp
+                    tm_past += datetime.timedelta(minutes=5)
+                is_incomplete = timedata_sorted_temperature.count() != 288
                 # DBへの登録
-                DayData.objects.create(day=day, temperature_min=temperature_min, temperature_max=temperature_max, temperature_avg=temperature_avg['temperature__avg'], humidity_min=humidity_min, humidity_max=humidity_max, humidity_avg=humidity_avg['humidity__avg'], is_incomplete=is_incomplete)
+                DayData.objects.create(day=day, temperature_min=temperature_min, temperature_max=temperature_max, temperature_avg=temperature_sum / 288, humidity_min=humidity_min, humidity_max=humidity_max, humidity_avg=humidity_sum / 288, is_incomplete=is_incomplete)
             # [例外処理]重複エラー
             except IntegrityError:
                 daydata = DayData.objects.filter(day__year=day.year, day__month=day.month, day__day=day.day).first()
                 daydata.day = day
                 daydata.temperature_min = temperature_min
                 daydata.temperature_max = temperature_max
-                daydata.temperature_avg = temperature_avg['temperature__avg']
+                daydata.temperature_avg = temperature_sum / 288
                 daydata.humidity_min = humidity_min
                 daydata.humidity_max = humidity_max
-                daydata.humidity_avg = humidity_avg['humidity__avg']
+                daydata.humidity_avg = humidity_sum / 288
                 daydata.is_incomplete = is_incomplete
                 daydata.save()
             # [例外処理]エラー
@@ -110,8 +128,8 @@ class Inkbird:
         # データアップロード
         data = {
             "d1": self.tm.strftime("%Y%m%d%H%M"),
-            "d2": self.temp,
-            "d3": self.humid,
+            "d2": self.temperature,
+            "d3": self.humidity,
             "d4": self.is_external,
         }
         am = ambient.Ambient(self.channel_id, self.write_key)
