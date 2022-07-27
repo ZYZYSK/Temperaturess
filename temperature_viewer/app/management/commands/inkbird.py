@@ -76,8 +76,7 @@ class Inkbird:
         except Exception:
             self.error_log()
         # DayData
-        # if self.tm.hour == 0 and self.tm.minute == 0:
-        if True:
+        if self.tm.hour == 0 and self.tm.minute == 0:
             try:
                 # 作成
                 day = datetime.datetime.date(self.tm - datetime.timedelta(days=1))
@@ -97,8 +96,6 @@ class Inkbird:
                 humidity_sum = timedata_sorted_humidity.aggregate(Sum('humidity'))['humidity__sum']
                 humidity_temp = timedata_sorted_humidity.aggregate(Avg('humidity'))['humidity__avg']
                 for _ in range(288):
-                    # tmp
-                    print(tm_past)
                     timedata_temp = list(filter(lambda item: item['tm'].hour == tm_past.hour and item['tm'].minute == tm_past.minute, timedata_sorted_dict))
                     # timedata_temp = timedata_sorted_temperature.filter(tm__hour=tm_past.hour, tm__minute=tm_past.minute).values()
                     # その時間のデータが存在する場合、一時的に値を記録しておく(初期値はその日の平均値)
