@@ -97,8 +97,8 @@ class Inkbird:
                     timedata_temp = timedata_sorted_temperature.filter(tm__hour=tm_past.hour, tm__minute=tm_past.minute)
                     # その時間のデータが存在する場合、一時的に値を記録しておく(初期値はその日の平均値)
                     if timedata_temp.exists():
-                        temperature_temp = timedata_temp.temperature
-                        humidity_temp = timedata_temp.humidity
+                        temperature_temp = timedata_temp.first().temperature
+                        humidity_temp = timedata_temp.first().humidity
                     # その時間のデータが存在しない場合、前の時刻のデータを使う
                     else:
                         temperature_sum += temperature_temp
