@@ -95,11 +95,11 @@ class Inkbird:
                 humidity_sum = timedata_sorted_humidity.aggregate(Sum('humidity'))['humidity__sum']
                 humidity_temp = timedata_sorted_humidity.aggregate(Avg('humidity'))['humidity__avg']
                 for _ in range(288):
-                    timedata_temp = timedata_sorted_temperature.filter(tm__hour=tm_past.hour, tm__minute=tm_past.minute)
+                    timedata_temp = timedata_sorted_temperature.filter(tm__hour=tm_past.hour, tm__minute=tm_past.minute).values()
                     # その時間のデータが存在する場合、一時的に値を記録しておく(初期値はその日の平均値)
                     if timedata_temp.exists():
-                        temperature_temp = timedata_temp.first().temperature
-                        humidity_temp = timedata_temp.first().humidity
+                        temperature_temp = timedata_temp[0]['temperature']
+                        humidity_temp = timedata_temp[0]['humidity']
                     # その時間のデータが存在しない場合、前の時刻のデータを使う
                     else:
                         temperature_sum += temperature_temp
