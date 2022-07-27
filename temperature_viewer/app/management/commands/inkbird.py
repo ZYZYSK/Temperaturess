@@ -1,4 +1,5 @@
 import datetime
+from time import time
 import traceback
 
 from django.db import IntegrityError
@@ -75,13 +76,14 @@ class Inkbird:
         except Exception:
             self.error_log()
         # DayData
-        if self.tm.hour == 0 and self.tm.minute == 0:
-            # if True:
+        # if self.tm.hour == 0 and self.tm.minute == 0:
+        if True:
             try:
                 # 作成
                 day = datetime.datetime.date(self.tm - datetime.timedelta(days=1))
                 timedata_sorted_temperature = TimeData.objects.filter(tm__year=day.year, tm__month=day.month, tm__day=day.day).order_by('temperature')
                 timedata_sorted_humidity = TimeData.objects.filter(tm__year=day.year, tm__month=day.month, tm__day=day.day).order_by('humidity')
+                timedata_sorted_dict = timedata_sorted_temperature.values()
                 # 最低気温と最高気温
                 temperature_min = timedata_sorted_temperature.first()
                 temperature_max = timedata_sorted_temperature.last()
@@ -95,9 +97,12 @@ class Inkbird:
                 humidity_sum = timedata_sorted_humidity.aggregate(Sum('humidity'))['humidity__sum']
                 humidity_temp = timedata_sorted_humidity.aggregate(Avg('humidity'))['humidity__avg']
                 for _ in range(288):
-                    timedata_temp = timedata_sorted_temperature.filter(tm__hour=tm_past.hour, tm__minute=tm_past.minute).values()
+                    # tmp
+                    print(tm_past)
+                    timedata_temp = list(filter(lambda item: item['tm'].hour == tm_past.hour and item['tm'].minute == tm_past.minute, timedata_sorted_dict))
+                    # timedata_temp = timedata_sorted_temperature.filter(tm__hour=tm_past.hour, tm__minute=tm_past.minute).values()
                     # その時間のデータが存在する場合、一時的に値を記録しておく(初期値はその日の平均値)
-                    if timedata_temp.exists():
+                    if len(timedata_temp) > 0:
                         temperature_temp = timedata_temp[0]['temperature']
                         humidity_temp = timedata_temp[0]['humidity']
                     # その時間のデータが存在しない場合、前の時刻のデータを使う
