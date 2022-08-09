@@ -21,12 +21,16 @@ matplotlib.use('Agg')
 
 
 def view_index(request):
-    # 最新の年月にジャンプ
+    """URLがドメイン名だけだった場合、自動で今日のページか、今月のページにジャンプ"""
+    """どっちにジャンプするかは、設定で変更可能にする"""
+    # 今日の日付
     tm_current = timezone.datetime.now()
+    # 今月にジャンプ
     return redirect(f'{tm_current.year}/{tm_current.month}')
 
 
 class YearView(TemplateView):
+    """指定された年のページにジャンプ"""
     template_name = "year.html"
     # アスタリスク1つ：可変長引数(タプル型)
     # アスタリスク2つ：辞書型引数
