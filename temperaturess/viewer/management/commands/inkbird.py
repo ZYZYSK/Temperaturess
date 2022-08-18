@@ -1,8 +1,10 @@
 import datetime
+from inspect import trace
 import json
 import logging
 import os
 import numpy as np
+import traceback
 import ambient
 from bluepy import btle
 import binascii
@@ -80,7 +82,7 @@ class Inkbird:
             self.logger.error('Error: This TimeData already exists!')
         # exception: Others
         except Exception as e:
-            self.logger.error(e)
+            self.logger.error(traceback.format_exc())
         # for debugging
         else:
             self.logger.debug(f'Successfully created TimeData ({self.tm}, {self.temperature}C, {self.humidity}%).')
@@ -150,7 +152,7 @@ class Inkbird:
                 self.logger.debug(f'Successfully created DayData ({day}, {temperature_min}C, {temperature_max}C, {temperature_sum/288}C,{humidity_min}%, {humidity_max}%, {humidity_sum/288}%).')
             # exception: Others
             except Exception as e:
-                self.logger.error(e)
+                self.logger.error(traceback.format_exc())
             # for debugging
             else:
                 self.logger.debug(f'Successfully created DayData ({day}, {temperature_min}C, {temperature_max}C, {temperature_sum/288}C,{humidity_min}%, {humidity_max}%, {humidity_sum/288}%).')
@@ -192,7 +194,7 @@ class Command(BaseCommand):
                 app.get_data()
             # エラー
             except Exception as e:
-                logger.error(e)
+                logger.error(traceback.format_exc())
                 continue
             # 成功
             else:
@@ -204,7 +206,7 @@ class Command(BaseCommand):
                         app.upload_ambient()
                     # エラー
                     except Exception as e:
-                        logger.error(e)
+                        logger.error(traceback.format_exc())
                         continue
                     # 成功
                     else:
