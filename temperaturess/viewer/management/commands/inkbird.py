@@ -170,7 +170,7 @@ class Inkbird:
 class Command(BaseCommand):
     def handle(self, *args, **options):
         # load settings
-        _settings = open('../../../../settings.json')
+        _settings = open('../settings.json')
         settings = json.load(_settings)
         MAC_ADDRESS = settings['mac_address']
         HANDLE = settings['handle']
