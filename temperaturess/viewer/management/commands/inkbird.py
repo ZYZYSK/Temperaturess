@@ -87,8 +87,7 @@ class Inkbird:
         else:
             self.logger.debug(f'Successfully created TimeData ({self.tm}, {self.temperature}C, {self.humidity}%).')
         # DayData
-        # if self.tm.hour == 0 and self.tm.minute == 0:
-        if True:
+        if self.tm.hour == 0 and self.tm.minute == 0:
             try:
                 # 作成
                 day = datetime.datetime.date(self.tm - datetime.timedelta(days=1))
