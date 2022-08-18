@@ -184,7 +184,7 @@ class Command(BaseCommand):
         logger = create_log(IS_DEBUG)
         logger.debug('Successfully created log.')
 
-        app = Inkbird(MAC_ADDRESS, HANDLE, CHANNEL_ID, WRITE_KEY)
+        app = Inkbird(MAC_ADDRESS, HANDLE, CHANNEL_ID, WRITE_KEY, logger)
         # データ取得
         for _ in range(RETRY_BLUETOOTH):
             # データ取得
