@@ -1,0 +1,17 @@
+{
+    "mac_address": "D8:A9:8B:75:40:D9",
+    "handle": "0x0028",
+    "channel_id": "46295",
+    "write_key": "4b49c065ac4682f3",
+    "retry_bluetooth": 2,
+    "retry_net": 2,
+    "is_debug": true,
+    "_comment": {
+        "mac_address": "MAC address of inkbird",
+        "handle": "0x0028",
+        "channel_id": "channel id of ambidata.io",
+        "write_key": "write key of ambidata.io",
+        "retry_bluetooth": "number of retries on connecting inkbird",
+        "retry_net": "number of retries on uploading data to ambidata.io"
+    }
+}

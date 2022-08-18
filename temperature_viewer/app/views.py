@@ -1,6 +1,8 @@
 import base64
+from difflib import context_diff
 import io
 import math
+import calendar
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
@@ -9,7 +11,7 @@ import datetime
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.db import IntegrityError
 from django.db.models import Avg
-from django.shortcuts import get_list_or_404, render
+from django.shortcuts import get_object_or_404, get_list_or_404, render
 from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
 from app.models import *
@@ -19,12 +21,16 @@ matplotlib.use('Agg')
 
 
 def view_index(request):
-    # 最新の年月にジャンプ
+    """URLがドメイン名だけだった場合、自動で今日のページか、今月のページにジャンプ"""
+    """どっちにジャンプするかは、設定で変更可能にする"""
+    # 今日の日付
     tm_current = timezone.datetime.now()
+    # 今月にジャンプ
     return redirect(f'{tm_current.year}/{tm_current.month}')
 
 
 class YearView(TemplateView):
+    """指定された年のページにジャンプ"""
     template_name = "year.html"
     # アスタリスク1つ：可変長引数(タプル型)
     # アスタリスク2つ：辞書型引数
@@ -52,6 +58,13 @@ class MonthView(TemplateView):
         context['month'] = kwargs['month']
         context['day'] = 1
         # データベースからオブジェクトの取得
+        if datetime.date.today().year == context['year'] and datetime.date.today().month == context['month'] and datetime.date.today().day == 1:
+            # 今日が1日の場合に、今月のデータを取得することはできない
+            if context['month'] == 1:
+                return redirect('month', year=context['year'] - 1, month=12)
+            else:
+                return redirect('month', year=context['year'], month=context['month'] - 1)
+
         daydatas = get_list_or_404(DayData.objects.filter(day__year=kwargs['year'], day__month=kwargs['month']).order_by('day'))
         normaldatas = get_list_or_404(NormalData.objects.filter(day__month=kwargs['month']).order_by('day'))
         # zip
@@ -65,7 +78,9 @@ class MonthView(TemplateView):
         y_1_temperature_normal_min = [round(normaldata.temperature_min, 1) for normaldata in normaldatas[:len(daydatas)]]
         y_1_temperature_normal_max = [round(normaldata.temperature_max, 1) for normaldata in normaldatas[:len(daydatas)]]
         y_1_temperature_normal_avg = [round(normaldata.temperature_avg, 1) for normaldata in normaldatas[:len(daydatas)]]
-        context['graph_1_temperature'] = self.graph_1(x, y_1_temperature_min, y_1_temperature_max, y_1_temperature_avg, y_n_min=y_1_temperature_normal_min, y_n_max=y_1_temperature_normal_max, y_n_avg=y_1_temperature_normal_avg)
+        context['graph_1_temperature'] = self.graph_1(x, y_1_temperature_min, y_1_temperature_max, y_1_temperature_avg, y_n_min=y_1_temperature_normal_min, y_n_max=y_1_temperature_normal_max, y_n_avg=y_1_temperature_normal_avg,
+                                                      dtick=2
+                                                      )
         # 湿度
         y_1_humidity_min = [round(daydata.humidity_min.humidity) for daydata in daydatas]
         y_1_humidity_max = [round(daydata.humidity_max.humidity) for daydata in daydatas]
@@ -87,7 +102,7 @@ class MonthView(TemplateView):
             # 計算できる場合
             y_5_temperature_daydata.append(y_5_objects_daydata.aggregate(Avg('temperature_avg'))['temperature_avg__avg'])
             y_5_temperature_normaldata.append(y_5_objects_normaldata.aggregate(Avg('temperature_avg'))['temperature_avg__avg'])
-        context['graph_5'] = self.graph_5([xx.day for xx in x], y_5_temperature_daydata, y_5_temperature_normaldata)
+        context['graph_5'] = self.graph_5(x=[xx.day for xx in x], y=y_5_temperature_daydata, y_normal=y_5_temperature_normaldata, cnt_days=calendar.monthrange(kwargs['year'], kwargs['month'])[1])
 
         # 渡す
         return render(self.request, self.template_name, context)
@@ -104,6 +119,13 @@ class MonthView(TemplateView):
             fig.add_trace(go.Scatter(x=x, y=y_n_min, name="最高(平年)", mode='lines', line=dict(color='black')))
             fig.add_trace(go.Scatter(x=x, y=y_n_max, name="最低(平年)", mode='lines', line=dict(color='black')))
             fig.add_trace(go.Scatter(x=x, y=y_n_avg, name="平均(平年)", mode='lines', line=dict(color='black')))
+        # 最小値と最大値用
+        graph_min = 0
+        graph_max = 100
+        if y_n_min is not None:
+            graph_min = min(y_n_min)
+        if y_n_max is not None:
+            graph_max = max(y_n_max)
 
         fig.update_layout(
             plot_bgcolor="#F5F5F5",
@@ -111,7 +133,7 @@ class MonthView(TemplateView):
             autosize=True,
             xaxis=dict(range=(x[0], x[len(x) - 1]), dtick='D1'),
             yaxis=dict(
-                range=(math.floor(min(y_min)), math.ceil(max(y_max))),
+                range=(math.floor(min(min(y_min), graph_min)), math.ceil(max(max(y_max), graph_max))),
                 dtick=dtick
             )
         )
@@ -119,20 +141,23 @@ class MonthView(TemplateView):
         fig.update_yaxes(linecolor="black", gridcolor="grey", mirror="allticks", zeroline=False)
         return fig.to_html(include_plotlyjs=False, full_html=False, default_width='90vw')
 
-    def graph_5(self, x: list, y: list, y_normal: list):
+    def graph_5(self, x: list, y: list, y_normal: list, cnt_days: int):
         x = np.array(x)
         y = np.array(y) - np.array(y_normal)
         y_normal = np.zeros(len(y))
         # 描画
         fig, ax = plt.subplots(1, 1, figsize=(15, 5))
-        ax.set_xlim(x[0], x[len(x) - 1])
-        ax.set_xticks(x)
-        ax.set_yticks(np.arange(math.floor(np.min(y)), math.ceil(np.max(y))))
-        ax.plot(x, y, color="grey")
-        ax.plot(x, y_normal, color="black", linewidth=2)
-        ax.fill_between(x=x, y1=y, y2=y_normal, where=y >= y_normal, facecolor='#fe9696', interpolate=True)
-        ax.fill_between(x, y, y_normal, where=y <= y_normal, facecolor='#9696e6', interpolate=True)
-        ax.grid()
+        # 描画できるデータがある場合のみ描画
+        if len(x) and len(y):
+            ax.set_xlim(1, cnt_days)
+            ax.set_xticks(range(1, cnt_days + 1))
+            ax.set_ylim(min(-3, math.floor(np.min(y))), max(3, math.ceil(np.max(y))))
+            ax.set_yticks(np.arange(min(-3, math.floor(np.min(y))), max(4, math.ceil(np.max(y)))))
+            ax.plot(x, y, color="grey")
+            ax.plot(x, y_normal, color="black", linewidth=2)
+            ax.fill_between(x=x, y1=y, y2=y_normal, where=y >= y_normal, facecolor='#fe9696', interpolate=True)
+            ax.fill_between(x, y, y_normal, where=y <= y_normal, facecolor='#9696e6', interpolate=True)
+            ax.grid()
         # バッファ
         buffer = io.BytesIO()
         plt.savefig(buffer, format='png')
@@ -448,3 +473,31 @@ class UploadView(TemplateView):
             else:
                 cnt_normaldata += 1
         return 1, f'{cnt_normaldata}件のNormalDataを作成しました<br>{cnt_normaldata_changed}件のNormalDataを変更しました'
+
+
+class EditWeatherView(TemplateView):
+    template_name = "edit_weather.html"
+    # アスタリスク1つ：可変長引数(タプル型)
+    # アスタリスク2つ：辞書型引数
+
+    def get(self, request, *args, **kwargs):
+        context = super(EditWeatherView, self).get_context_data(**kwargs)
+        # 年月日を個別に渡す
+        context['year'] = kwargs['year']
+        context['month'] = kwargs['month']
+        context['day'] = kwargs['day']
+        # データベースからオブジェクトの取得
+        daydata = get_object_or_404(DayData.objects.filter(day__year=kwargs['year'], day__month=kwargs['month'], day__day=kwargs['day']))
+        context['daydata'] = daydata
+        # 渡す
+        return render(self.request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        context = super(EditWeatherView, self).get_context_data(**kwargs)
+        # データベースからオブジェクトの取得
+        daydata = get_object_or_404(DayData.objects.filter(day__year=context['year'], day__month=context['month'], day__day=context['day']))
+        # データの取得（POST）
+        weather = request.POST.get('weather', "")
+        daydata.weather = weather
+        daydata.save()
+        return redirect('month', context['year'], context['month'])

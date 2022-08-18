@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load datetime %}
+{% load exists %}
+{% load daydata_year %}
+{% comment %} ナビゲーションバー {% endcomment %}
+{% block nav %}
+  {% previous_year year as previous_year%}
+  {% comment %} 前年 {% endcomment %}
+  <li class="nav-item ms-3 ms-sm-0 me-sm-3">
+    {% comment %} 前年のデータが存在する場合 {% endcomment %}
+    {% if previous_year|exist_year %}
+    <a href={% url 'year' previous_year %} class="nav-link">
+    {% comment %} 存在しない場合 {% endcomment %}
+    {% else %}
+    <a class="nav-link disabled">
+    {% endif %}
+    <前年</a>
+  </li>
+  {% comment %} 今年 {% endcomment %}
+  <li class="nav_item ms-3 ms-sm-0 mt-2">
+    <span class="navbar-brand h1">{{year}} 年</span>
+  </li>
+  {% comment %} 翌年 {% endcomment %}
+  {% next_year year as next_year%}
+  <li class="nav-item ms-3 ms-sm-1">
+    {% comment %} 翌年のデータが存在する場合 {% endcomment %}
+    {% if next_year|exist_year %}
+    <a href={% url 'year' next_year %} class="nav-link">
+    {% comment %} 存在しない場合 {% endcomment %}
+    {% else %}
+    <a class="nav-link disabled">
+    {% endif %}
+    翌年></a>
+  </li>
+{% endblock nav %}
+
+{% block free %}
+{% comment %} 一覧 {% endcomment %}
+  <div id="dib_table_main">
+    <table id="table_main" class="table table-sm table-hover table-bordered">
+      <thead>
+        <tr>
+          <th scope="col" rowspan="2">月</th>
+          <th scope="col" colspan="3">気温:平均値(°C)</th>
+          <th scope="col" colspan="2">気温:最低値(°C)</th>
+          <th scope="col" colspan="2">気温:最高値(°C)</th>
+          <th scope="col" colspan="3">湿度(%)</th>
+          <th scope="col" colspan="3">平年気温(°C)</th>
+        </tr>
+        <tr>
+          <th scope="col">平均</th>
+          <th scope="col">最低</th>
+          <th scope="col">最高</th>
+          <th scope="col">最低</th>
+          <th scope="col">最高</th>
+          <th scope="col">最低</th>
+          <th scope="col">最高</th>
+          <th scope="col">平均</th>
+          <th scope="col">最小</th>
+          <th scope="col">最大</th>
+          <th scope="col">平均</th>
+          <th scope="col">最低</th>
+          <th scope="col">最高</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% with ''|center:12 as range %}
+        {% for _ in range %}
+        <tr>
+          <th scope="row">
+            {% if year|exist_month:forloop.counter %}
+            <a href={% url 'month' year forloop.counter %}>{{forloop.counter}}</a>
+            {% else %}
+            {{forloop.counter}}
+            {% endif %}
+          </th>
+          <td>
+            {{year|average_temperature_avg:forloop.counter|floatformat:1}}
+          </td>
+          <td>
+            {{year|average_temperature_min:forloop.counter|floatformat:1}}
+          </td>
+          <td>
+            {{year|average_temperature_max:forloop.counter|floatformat:1}}
+          </td>
+          <td>
+            {{year|min_temperature_min:forloop.counter|floatformat:1}}
+          </td>
+          <td>
+            {{year|min_temperature_max:forloop.counter|floatformat:1}}
+          </td>
+          <td>
+            {{year|max_temperature_min:forloop.counter|floatformat:1}}
+          </td>
+          <td>
+            {{year|max_temperature_max:forloop.counter|floatformat:1}}
+          </td>
+          <td>
+            {{year|average_humidity_avg:forloop.counter|floatformat:0}}
+          </td>
+          <td>
+            {{year|average_humidity_min:forloop.counter|floatformat:0}}
+          </td>
+          <td>
+            {{year|average_humidity_max:forloop.counter|floatformat:0}}
+          </td>
+          <td>
+            {{year|average_temperature_avg_normal:forloop.counter|floatformat:1}}
+          </td>
+          <td>
+            {{year|average_temperature_min_normal:forloop.counter|floatformat:1}}
+          </td>
+          <td>
+            {{year|average_temperature_max_normal:forloop.counter|floatformat:1}}
+          </td>
+        </tr>
+        {% endfor %}
+        {% endwith %}
+        <tr>
+          <th>平均</th>
+          <td>
+            {{year|average_temperature_avg|floatformat:1}}
+          </td>
+          <td>
+            {{year|average_temperature_min|floatformat:1}}
+          </td>
+          <td>
+            {{year|average_temperature_max|floatformat:1}}
+          </td>
+          <td>
+            {{year|min_temperature_min|floatformat:1}}
+          </td>
+          <td>
+            {{year|min_temperature_max|floatformat:1}}
+          </td>
+          <td>
+            {{year|max_temperature_min|floatformat:1}}
+          </td>
+          <td>
+            {{year|max_temperature_max|floatformat:1}}
+          </td>
+          <td>
+            {{year|average_humidity_avg|floatformat:0}}
+          </td>
+          <td>
+            {{year|average_humidity_min|floatformat:0}}
+          </td>
+          <td>
+            {{year|average_humidity_max|floatformat:0}}
+          </td>
+          <td>
+            {{year|average_temperature_avg_normal|floatformat:1}}
+          </td>
+          <td>
+            {{year|average_temperature_min_normal|floatformat:1}}
+          </td>
+          <td>
+            {{year|average_temperature_max_normal|floatformat:1}}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+{% endblock free %}
