@@ -38,7 +38,7 @@ class Inkbird:
         # MAC address
         self.address = address
         # handle
-        self.handle = hex(int(handle, 16))
+        self.handle = int(handle, 16)
         # Ambient
         self.channel_id = channel_id
         self.write_key = write_key
