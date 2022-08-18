@@ -20,7 +20,7 @@ from django.urls import path, include
 from app.views import YearView, MonthView, DayView, UploadView, EditWeatherView, view_index
 urlpatterns = [
     path('admin/', admin.site.urls, name='admin'),
-    path('', include('app.urls', namespace='app'))
+    path('app/', include('app.urls', namespace='app'))
     # path('', view_index, name='index'),
     # path('<int:year>', YearView.as_view(), name='year'),
     # path('<int:year>/<int:month>', MonthView.as_view(), name='month'),

@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block free %}
+{% comment %} 天気の編集欄 {% endcomment %}
+<form id="form" method="post">
+    {% csrf_token %}
+    <div class="input-group mt-3 mb-3 ms-2 me-2">
+        <span class="input-group-text">
+            天気
+        </span>
+        <input type="text" class="form-control" name="weather" id="weather" placeholder="天気を入力..." value={{daydata.weather}}>
+    </div>
+    <div class="d-grid ms-2 me-2">
+        <input type="submit" value="変更" class="btn btn-dark btn-lg">
+    </div>
+</form>
+{% endblock free %}
