@@ -15,7 +15,7 @@
   {% previous_day year month day as previous_day%}
   {% exist_day previous_year previous_month previous_day as exist_day_previous %}
   <li class="nav-item ms-3 ms-sm-0 me-sm-3">
-    {% comment %} if previous day's exists  {% endcomment %}
+    {% comment %} if previous day's data exists  {% endcomment %}
     {% if exist_day_previous %}
       <a href={% url 'day' previous_year previous_month previous_day %} class="nav-link">
     {% else %}
