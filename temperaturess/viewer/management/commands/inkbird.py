@@ -22,8 +22,8 @@ def create_log(is_debug: bool = False) -> logging.Logger:
     logger.setLevel(logging.INFO)
     if is_debug:
         logger.setLevel(logging.DEBUG)
-    # create directory 'logs' if not exists
-    os.makedirs('logs', exist_ok=True)
+    # create directory "logs" if not exists
+    os.makedirs("logs", exist_ok=True)
     # set save log path
     log_handler = logging.FileHandler(datetime.datetime.now().strftime("logs/%Y_%m_%d_%H_%M_%S.log"))
     # set log format
@@ -45,7 +45,7 @@ class Inkbird:
         # Log
         self.logger = logger
         # for debugging
-        self.logger.debug(f'MAC address: {self.address}, handle: {self.handle}, Channel ID: {self.channel_id}, write_key: {self.write_key}.')
+        self.logger.debug(f"MAC address: {self.address}, handle: {self.handle}, Channel ID: {self.channel_id}, write_key: {self.write_key}.")
 
     def get_data(self) -> None:
         # get current time
@@ -79,13 +79,13 @@ class Inkbird:
             TimeData.objects.create(tm=self.tm, temperature=self.temperature, humidity=self.humidity, is_external=self.is_external)
         # exception: Data Duplication
         except IntegrityError:
-            self.logger.error('Error: This TimeData already exists!')
+            self.logger.error("Error: This TimeData already exists!")
         # exception: Others
         except Exception as e:
             self.logger.error(traceback.format_exc())
         # for debugging
         else:
-            self.logger.debug(f'Successfully created TimeData ({self.tm}, {self.temperature}C, {self.humidity}%).')
+            self.logger.debug(f"Successfully created TimeData ({self.tm}, {self.temperature}C, {self.humidity}%).")
         # DayData
         if self.tm.hour == 0 and self.tm.minute == 0:
             try:
@@ -95,28 +95,28 @@ class Inkbird:
                 datas = timedatas.values()
 
                 # get min & max temperature
-                temperature_min = min([data.get('temperature') for data in datas])
-                temperature_max = max([data.get('temperature') for data in datas])
+                temperature_min = min([data.get("temperature") for data in datas])
+                temperature_max = max([data.get("temperature") for data in datas])
                 timedata_temperature_min = timedatas.filter(temperature=temperature_min).first()
                 timedata_temperature_max = timedatas.filter(temperature=temperature_max).first()
                 # get min & max humidity
-                humidity_min = min([data.get('humidity') for data in datas])
-                humidity_max = max([data.get('humidity') for data in datas])
+                humidity_min = min([data.get("humidity") for data in datas])
+                humidity_max = max([data.get("humidity") for data in datas])
                 timedata_humidity_min = timedatas.filter(humidity=humidity_min).first()
                 timedata_humidity_max = timedatas.filter(humidity=humidity_max).first()
 
                 # get average temperature & humidity
                 time_past = datetime.datetime(day.year, day.month, day.day, 0, 0)
-                temperature_sum = np.sum([data.get('temperature') for data in datas])
-                humidity_sum = np.sum([data.get('humidity') for data in datas])
-                temperature_temp = np.mean([data.get('temperature') for data in datas])
-                humidity_temp = np.mean([data.get('humidity') for data in datas])
+                temperature_sum = np.sum([data.get("temperature") for data in datas])
+                humidity_sum = np.sum([data.get("humidity") for data in datas])
+                temperature_temp = np.mean([data.get("temperature") for data in datas])
+                humidity_temp = np.mean([data.get("humidity") for data in datas])
                 for _ in range(288):
-                    timedata_temp = list(filter(lambda item: item['tm'].hour == time_past.hour and item['tm'].minute == time_past.minute, datas))
+                    timedata_temp = list(filter(lambda item: item["tm"].hour == time_past.hour and item["tm"].minute == time_past.minute, datas))
                     # record the data temporary if exists
                     if len(timedata_temp) > 0:
-                        temperature_temp = timedata_temp[0]['temperature']
-                        humidity_temp = timedata_temp[0]['humidity']
+                        temperature_temp = timedata_temp[0]["temperature"]
+                        humidity_temp = timedata_temp[0]["humidity"]
                     # use the previous data if doesn't exist
                     else:
                         temperature_sum += temperature_temp
@@ -137,7 +137,7 @@ class Inkbird:
                     is_incomplete=is_incomplete)
             # exception: Data Duplication
             except IntegrityError:
-                self.logger.warning('Warning: This DayData already exists!')
+                self.logger.warning("Warning: This DayData already exists!")
                 daydata = DayData.objects.filter(day__year=day.year, day__month=day.month, day__day=day.day).first()
                 daydata.day = day
                 daydata.temperature_min = timedata_temperature_min
@@ -149,13 +149,13 @@ class Inkbird:
                 daydata.is_incomplete = is_incomplete
                 daydata.save()
                 # for debugging
-                self.logger.debug(f'Successfully created DayData ({day}, {temperature_min}C, {temperature_max}C, {temperature_sum/288}C,{humidity_min}%, {humidity_max}%, {humidity_sum/288}%).')
+                self.logger.debug(f"Successfully created DayData ({day}, {temperature_min}C, {temperature_max}C, {temperature_sum/288}C,{humidity_min}%, {humidity_max}%, {humidity_sum/288}%).")
             # exception: Others
             except Exception as e:
                 self.logger.error(traceback.format_exc())
             # for debugging
             else:
-                self.logger.debug(f'Successfully created DayData ({day}, {temperature_min}C, {temperature_max}C, {temperature_sum/288}C,{humidity_min}%, {humidity_max}%, {humidity_sum/288}%).')
+                self.logger.debug(f"Successfully created DayData ({day}, {temperature_min}C, {temperature_max}C, {temperature_sum/288}C,{humidity_min}%, {humidity_max}%, {humidity_sum/288}%).")
 
     def upload_ambient(self):
         # upload data to ambient
@@ -172,19 +172,19 @@ class Inkbird:
 class Command(BaseCommand):
     def handle(self, *args, **options):
         # load settings
-        _settings = open('../settings.json')
+        _settings = open("../settings.json")
         settings = json.load(_settings)
-        MAC_ADDRESS = settings['mac_address']
-        HANDLE = settings['handle']
-        CHANNEL_ID = settings['channel_id']
-        WRITE_KEY = settings['write_key']
-        RETRY_BLUETOOTH = settings['retry_bluetooth']
-        RETRY_NET = settings['retry_net']
-        IS_DEBUG = settings['is_debug']
+        MAC_ADDRESS = settings["mac_address"]
+        HANDLE = settings["handle"]
+        CHANNEL_ID = settings["channel_id"]
+        WRITE_KEY = settings["write_key"]
+        RETRY_BLUETOOTH = settings["retry_bluetooth"]
+        RETRY_NET = settings["retry_net"]
+        IS_DEBUG = settings["is_debug"]
 
         # set log
         logger = create_log(IS_DEBUG)
-        logger.debug('Successfully created log.')
+        logger.debug("Successfully created log.")
 
         app = Inkbird(MAC_ADDRESS, HANDLE, CHANNEL_ID, WRITE_KEY, logger)
         # データ取得

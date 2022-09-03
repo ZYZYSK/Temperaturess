@@ -6,57 +6,39 @@ from django.db import models
 
 
 class TimeData(models.Model):
-    # 日時
     tm = models.DateTimeField(primary_key=True)
-    # 気温
     temperature = models.FloatField(null=True, blank=True)
-    # 湿度
     humidity = models.FloatField(null=True, blank=True)
-    # 外部プローブ
+    # whether or not an external probe is connected
     is_external = models.BooleanField(null=True, blank=True)
-    # バッテリーの残量
+    # battery remaining
     battery = models.IntegerField(null=True, blank=True)
 
 
-# 日別値
 class DayData(models.Model):
-    # 日付
     day = models.DateField(primary_key=True)
-    # 最低気温
-    temperature_min = models.ForeignKey(TimeData, null=True, blank=True, on_delete=models.SET_NULL, related_name='temperature_min')
-    # 最高気温
-    temperature_max = models.ForeignKey(TimeData, null=True, blank=True, on_delete=models.SET_NULL, related_name='temperature_max')
-    # 平均気温
+    temperature_min = models.ForeignKey(TimeData, null=True, blank=True, on_delete=models.SET_NULL, related_name="temperature_min")
+    temperature_max = models.ForeignKey(TimeData, null=True, blank=True, on_delete=models.SET_NULL, related_name="temperature_max")
     temperature_avg = models.FloatField(null=True, blank=True)
-    # 最低湿度
-    humidity_min = models.ForeignKey(TimeData, null=True, blank=True, on_delete=models.SET_NULL, related_name='humidity_min')
-    # 最低湿度
-    humidity_max = models.ForeignKey(TimeData, null=True, blank=True, on_delete=models.SET_NULL, related_name='humidity_max')
-    # 平均湿度
+    humidity_min = models.ForeignKey(TimeData, null=True, blank=True, on_delete=models.SET_NULL, related_name="humidity_min")
+    humidity_max = models.ForeignKey(TimeData, null=True, blank=True, on_delete=models.SET_NULL, related_name="humidity_max")
     humidity_avg = models.FloatField(null=True, blank=True)
-    # 天気
-    weather = models.CharField(max_length=50, default='')
-
-    # データ件数がすべてそろっていないかどうか
+    weather = models.CharField(max_length=50, default="")
+    # whether or not all data is recorded
     is_incomplete = models.BooleanField(default=True)
 
 
-# 平年値
+# Normal value
 class NormalData(models.Model):
-    # 開始年
+    # from what time
     year_start = models.IntegerField()
-    # 終了年
+    # until what time
     year_end = models.IntegerField()
-    # 日付
     day = models.DateField(primary_key=True)
-    # 最低気温
     temperature_min = models.FloatField()
-    # 最高気温
     temperature_max = models.FloatField()
-    # 平均気温
     temperature_avg = models.FloatField()
-    # 閾値
-    # 「高い」の閾値
+    # threshold
     temperature_min_lowest = models.FloatField()
     temperature_min_low = models.FloatField()
     temperature_min_high = models.FloatField()

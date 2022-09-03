@@ -1,20 +1,7 @@
-#div_table_main{
-    min-height: 300px;
-    overflow: scroll;
+#table_summary {
+    table-layout: fixed;
 }
-#div_table_summary{
-    height: fit-content;
-}
-#table_main>thead>tr>th{
-    width: 25%;
-    position: sticky;
-    top:0rem;
-    background:white;
-}
-#table_summary th{
-    width: 10%;
-}
-.table_summary_border{
-    border-right: 1px solid white;
 
+.table_summary_border {
+    border-right: 1px solid white;
 }

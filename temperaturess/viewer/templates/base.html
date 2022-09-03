@@ -22,16 +22,16 @@
   <script type="text/javascript" src="{% static 'datatables.min.js' %}"></script>
   <script type="text/javascript" src="{% static 'plotly-2.9.0.min.js' %}"></script>
   <div id="div_all" class="d-flex flex-column container-fluid">
-    {% comment %} ナビゲーションバー {% endcomment %}
+    {% comment %} navigation bar {% endcomment %}
     <nav id="navbar" class="navbar navbar-expand-sm navbar-dark bg-dark fixed-top">
       <div class="container-fluid">
-        {% comment %} トグルボタン {% endcomment %}
+        {% comment %} toggle button {% endcomment %}
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar_toggle" aria-controls="navbar_toggle" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
-        {% comment %} タイトル {% endcomment %}
+        {% comment %} title {% endcomment %}
         <span class="navbar-brand me-sm-3">気温Viewer</span>
-        {% comment %} 本体 {% endcomment %}
+        {% comment %} others {% endcomment %}
         <div class="collapse navbar-collapse" id="navbar_toggle">
           <ul class="navbar-nav me-auto">
             {% block nav %}{% endblock nav %}
@@ -61,7 +61,7 @@
         </div>
       </div>
     </nav>
-    {% comment %} 本文 {% endcomment %}
+    {% comment %} body {% endcomment %}
     {% block free %}{% endblock free %}
   </div>
 </body>

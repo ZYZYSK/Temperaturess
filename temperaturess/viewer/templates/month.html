@@ -3,124 +3,136 @@
 {% load datetime %}
 {% load exists %}
 {% load daydata_month %}
-{% comment %} リンク{% endcomment %}
+{% comment %} link {% endcomment %}
 {% block link %}
     <link rel="stylesheet" href="{% static 'month.css' %}">
 {% endblock link %}
-{% comment %} ナビゲーションバー {% endcomment %}
+{% comment %} navigation bar {% endcomment %}
 {% block nav %}
-  {% comment %} 前月 {% endcomment %}
+  {% comment %} previous month {% endcomment %}
   {% previous_year year month as previous_year%}
   {% previous_month year month as previous_month%}
   <li class="nav-item ms-3 ms-sm-0 me-sm-3">
-    {% comment %} 前月のデータが存在する場合 {% endcomment %}
+    {% comment %} if previous month's data exists {% endcomment %}
     {% if previous_year|exist_month:previous_month %}
-    <a href={% url 'month' previous_year previous_month %} class="nav-link">
-    {% comment %} 存在しない場合 {% endcomment %}
+      <a href={% url 'month' previous_year previous_month %} class="nav-link">
     {% else %}
-    <a class="nav-link disabled">
+      <a class="nav-link disabled">
     {% endif %}
     <前月</a>
   </li>
-  {% comment %} 今月 {% endcomment %}
+  {% comment %} current page's month {% endcomment %}
   <li class="nav_item ms-3 ms-sm-0 mt-2">
     <span class="navbar-brand h1">{{year}} 年 {{month}} 月</span>
   </li>
-  {% comment %} 翌月 {% endcomment %}
+  {% comment %} next month {% endcomment %}
   {% next_year year month as next_year%}
   {% next_month year month as next_month%}
   <li class="nav-item ms-3 ms-sm-1">
-    {% comment %} 翌月のデータが存在する場合 {% endcomment %}
+    {% comment %} if next month's data exists {% endcomment %}
     {% if next_year|exist_month:next_month %}
-    <a href={% url 'month' next_year next_month %} class="nav-link">
-    {% comment %} 存在しない場合 {% endcomment %}
+      <a href={% url 'month' next_year next_month %} class="nav-link">
     {% else %}
-    <a class="nav-link disabled">
+      <a class="nav-link disabled">
     {% endif %}
     翌月></a>
   </li>
 {% endblock nav %}
 
 {% block free %}
-{% comment %} 一覧 {% endcomment %}
-  <div id="div_table_main">
-    <table id="table_main" class="table table-sm table-hover table-bordered">
-      <thead>
-        <tr>
-          <th class="table_main_col" scope="col" rowspan="2">日</th>
-          <th scope="col" colspan="3">気温(°C)</th>
-          <th scope="col" colspan="3">湿度(%)</th>
-          <th class="table_main_col" scope="col" rowspan="2">備考</th>
-          <th scope="col" colspan="3">平年気温(C)</th>
-        </tr>
-        <tr>
-          <th class="table_main_col" scope="col">平均</th>
-          <th class="table_main_col" scope="col">最低</th>
-          <th class="table_main_col" scope="col">最高</th>
-          <th class="table_main_col" scope="col">平均</th>
-          <th class="table_main_col" scope="col">最小</th>
-          <th class="table_main_col" scope="col">最大</th>
-          <th class="table_main_col" scope="col">平均</th>
-          <th class="table_main_col" scope="col">最低</th>
-          <th class="table_main_col" scope="col">最高</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for data in datas %}
-        <tr>
-          <th scope="row">
+{% comment %} table {% endcomment %}
+  <table id="table_main" class="table table-sm table-hover table-bordered">
+    <thead>
+      <tr>
+        <th class="table_main_col" scope="col" rowspan="2">日</th>
+        <th scope="col" colspan="3">気温(°C)</th>
+        <th scope="col" colspan="3">湿度(%)</th>
+        <th class="table_main_col" scope="col" rowspan="2">備考</th>
+        <th scope="col" colspan="3">平年気温(C)</th>
+      </tr>
+      <tr>
+        <th class="table_main_col" scope="col">平均</th>
+        <th class="table_main_col" scope="col">最低</th>
+        <th class="table_main_col" scope="col">最高</th>
+        <th class="table_main_col" scope="col">平均</th>
+        <th class="table_main_col" scope="col">最小</th>
+        <th class="table_main_col" scope="col">最大</th>
+        <th class="table_main_col" scope="col">平均</th>
+        <th class="table_main_col" scope="col">最低</th>
+        <th class="table_main_col" scope="col">最高</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for data in datas %}
+      <tr>
+        {% comment %} day {% endcomment %}
+        <th scope="row">
+          {% if data.daydata %}
             <a href={% url 'day' year month data.daydata.day|date:"j" %}>{{data.daydata.day|date:"j"}}
             </a>
-          </th>
-          {% comment %} 平均 {% endcomment %}
-          {% if data.daydata.temperature_avg >= data.normaldata.temperature_avg_highest %}
-          <td class="bg-danger text-white">
-          {% elif data.daydata.temperature_avg >= data.normaldata.temperature_avg_high %}
-          <td class="bg-warning">
-          {% elif data.daydata.temperature_avg <= data.normaldata.temperature_avg_lowest %}
-          <td class="bg-primary text-white">
-          {% elif data.daydata.temperature_avg <= data.normaldata.temperature_avg_low %}
-          <td class="bg-info">
           {% else %}
-          <td>
+            {{data.normaldata.day|date:"j"}}
+          {% endif %}
+        </th>
+        {% comment %} average {% endcomment %}
+        {% if data.daydata %}
+          {% if data.daydata.temperature_avg >= data.normaldata.temperature_avg_highest %}
+            <td class="bg-danger text-white">
+          {% elif data.daydata.temperature_avg >= data.normaldata.temperature_avg_high %}
+            <td class="bg-warning">
+          {% elif data.daydata.temperature_avg <= data.normaldata.temperature_avg_lowest %}
+            <td class="bg-primary text-white">
+          {% elif data.daydata.temperature_avg <= data.normaldata.temperature_avg_low %}
+            <td class="bg-info">
+          {% else %}
+            <td>
           {% endif %}
             {{data.daydata.temperature_avg|floatformat:1}}
-          </td>
-          {% comment %} 最低 {% endcomment %}
+            </td>
+        {% else %}
+          <td></td>
+        {% endif %}
+        {% comment %} min {% endcomment %}
+        {% if data.daydata %}
           {% if data.daydata.temperature_min.temperature >= data.normaldata.temperature_min_highest %}
-          <td class="bg-danger text-white">
+            <td class="bg-danger text-white">
           {% elif data.daydata.temperature_min.temperature >= data.normaldata.temperature_min_high %}
-          <td class="bg-warning">
+            <td class="bg-warning">
           {% elif data.daydata.temperature_min.temperature <= data.normaldata.temperature_min_lowest %}
-          <td class="bg-primary text-white">
+            <td class="bg-primary text-white">
           {% elif data.daydata.temperature_min.temperature <= data.normaldata.temperature_min_low %}
-          <td class="bg-info">
+            <td class="bg-info">
           {% else %}
-          <td>
+            <td>
           {% endif %}
             {{data.daydata.temperature_min.temperature|floatformat:1}}
-          </td>
-          {% comment %} 最高 {% endcomment %}
+            </td>
+        {% else %}
+          <td></td>
+        {% endif %}
+        {% comment %} max{% endcomment %}
+        {% if data.daydata %}
           {% if data.daydata.temperature_max.temperature >= data.normaldata.temperature_max_highest %}
-          <td class="bg-danger text-white">
+            <td class="bg-danger text-white">
           {% elif data.daydata.temperature_max.temperature >= data.normaldata.temperature_max_high %}
-          <td class="bg-warning">
+            <td class="bg-warning">
           {% elif data.daydata.temperature_max.temperature <= data.normaldata.temperature_max_lowest %}
-          <td class="bg-primary text-white">
+            <td class="bg-primary text-white">
           {% elif data.daydata.temperature_max.temperature <= data.normaldata.temperature_max_low %}
-          <td class="bg-info">
+            <td class="bg-info">
           {% else %}
-          <td>
+            <td>
           {% endif %}
             {{data.daydata.temperature_max.temperature|floatformat:1}}
-          </td>
-          {% comment %} その他 {% endcomment %}
-          <td>{{data.daydata.humidity_avg|floatformat:0}}
-          </td>
-          <td>{{data.daydata.humidity_min.humidity|floatformat:0}}
-          </td>
-          <td>{{data.daydata.humidity_max.humidity|floatformat:0}}
-          </td>
+            </td>
+        {% else %}
+          <td></td>
+        {% endif %}
+        {% comment %} others {% endcomment %}
+        {% if data.daydata %}
+          <td>{{data.daydata.humidity_avg|floatformat:0}}</td>
+          <td>{{data.daydata.humidity_min.humidity|floatformat:0}}</td>
+          <td>{{data.daydata.humidity_max.humidity|floatformat:0}}</td>
           <td>
               {% if data.daydata.is_incomplete %}){% endif %}
               {% if data.daydata.weather == "" %}
@@ -133,36 +145,41 @@
                 </a>
               {% endif %}
           </td>
-          <td>{{data.normaldata.temperature_avg}}
+        {% else %}
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        {% endif %}
+        <td>{{data.normaldata.temperature_avg}}
 
-          </td>
-          <td>{{data.normaldata.temperature_min}}
+        </td>
+        <td>{{data.normaldata.temperature_min}}
 
-          </td>
-          <td>{{data.normaldata.temperature_max}}
+        </td>
+        <td>{{data.normaldata.temperature_max}}
 
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-      <thead>
-        <tr>
-          <th scope="row" class="table_summary">平均</th>
-          <td class="table_summary">{{ datas|average_day_temperature_avg|floatformat:1 }}</td>
-          <td class="table_summary">{{ datas|average_day_temperature_min|floatformat:1 }}</td>
-          <td class="table_summary">{{ datas|average_day_temperature_max|floatformat:1 }}</td>
-          <td class="table_summary">{{ datas|average_day_humidity_avg|floatformat:0 }}</td>
-          <td class="table_summary">{{ datas|average_day_humidity_min|floatformat:0 }}</td>
-          <td class="table_summary">{{ datas|average_day_humidity_max|floatformat:0 }}</td>
-          <td class="table_summary"></td>
-          <td class="table_summary">{{ datas|average_normal_temperature_avg|floatformat:1 }}</td>
-          <td class="table_summary">{{ datas|average_normal_temperature_min|floatformat:1 }}</td>
-          <td class="table_summary">{{ datas|average_normal_temperature_max|floatformat:1 }}</td>
-        </tr>
-      </thead>
-    </table>
-  </div>
-{% comment %} グラフ {% endcomment %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <th scope="row" class="table_summary">平均</th>
+        <td class="table_summary">{{ datas|average_day_temperature_avg|floatformat:1 }}</td>
+        <td class="table_summary">{{ datas|average_day_temperature_min|floatformat:1 }}</td>
+        <td class="table_summary">{{ datas|average_day_temperature_max|floatformat:1 }}</td>
+        <td class="table_summary">{{ datas|average_day_humidity_avg|floatformat:0 }}</td>
+        <td class="table_summary">{{ datas|average_day_humidity_min|floatformat:0 }}</td>
+        <td class="table_summary">{{ datas|average_day_humidity_max|floatformat:0 }}</td>
+        <td class="table_summary"></td>
+        <td class="table_summary">{{ datas|average_normal_temperature_avg|floatformat:1 }}</td>
+        <td class="table_summary">{{ datas|average_normal_temperature_min|floatformat:1 }}</td>
+        <td class="table_summary">{{ datas|average_normal_temperature_max|floatformat:1 }}</td>
+      </tr>
+    </tfoot>
+  </table>
+{% comment %} graph {% endcomment %}
   <div id="graph">
     <ul class="nav nav-tabs" role="tablist">
       <li class="nav-item" role="presentation">
@@ -191,14 +208,20 @@
       </div>
     </div>
   </div>
-{% comment %} スクリプト {% endcomment %}
+{% comment %} scripts {% endcomment %}
 <script type="text/javascript">
-  {% comment %} テーブルソート機能 {% endcomment %}
+  {% comment %} sort tables {% endcomment %}
   $(document).ready(function(){
-    $('#table_main').DataTable({
+    var table=$("#table_main").DataTable({
       "paging":false,
       "info":false,
-      "searching":false
+      "searching":false,
+      "scrollY":300,
+      "columnDefs":[{"width":"20%","targets":7},{"width":"8%","targets":[0,1,2,3,4,5,6,8,9,10]}]
+    });
+    // resize table
+    $(window).on("resize",function(){
+      table.columns.adjust();
     });
   });
 </script>

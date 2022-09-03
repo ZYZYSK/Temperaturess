@@ -6,15 +6,15 @@ register = template.Library()
 
 @register.simple_tag
 def previous_year(year, month=None, day=None):
-    # 引数により前日/前月/前年を計算し、その年を返す
-    # 年
+    # calculate previous year / month / day & return the year
+    # year
     if month is None and day is None:
         return year - 1
-    # 月
+    # month
     elif day is None:
         dt = datetime.date(year, month, 1)
         return (dt - relativedelta(months=1)).year
-    # 日
+    # day
     else:
         dt = datetime.date(year, month, day)
         return (dt - datetime.timedelta(days=1)).year
@@ -22,12 +22,12 @@ def previous_year(year, month=None, day=None):
 
 @register.simple_tag
 def previous_month(year, month, day=None):
-    # 引数により前日/前月を計算し、その月を返す
-    # 前月
+    # calculate previous month / day & return the month
+    # month
     if day is None:
         dt = datetime.date(year, month, 1)
         return (dt - relativedelta(months=1)).month
-    # 前日
+    # day
     else:
         dt = datetime.date(year, month, day)
         return (dt - datetime.timedelta(days=1)).month
@@ -35,22 +35,22 @@ def previous_month(year, month, day=None):
 
 @register.simple_tag
 def previous_day(year, month, day):
-    # 引数により前日を計算し、その日を返す
+    # calculate previous day & return the day
     dt = datetime.date(year, month, day)
     return (dt - datetime.timedelta(days=1)).day
 
 
 @register.simple_tag
 def next_year(year, month=None, day=None):
-    # 引数により翌日/翌月/翌年を計算し、その年を返す
-    # 年
+    # calculate next year / month / day & return the year
+    # year
     if month is None and day is None:
         return year + 1
-    # 月
+    # month
     elif day is None:
         dt = datetime.date(year, month, 1)
         return (dt + relativedelta(months=1)).year
-    # 日
+    # day
     else:
         dt = datetime.date(year, month, day)
         return (dt + datetime.timedelta(days=1)).year
@@ -58,12 +58,12 @@ def next_year(year, month=None, day=None):
 
 @register.simple_tag
 def next_month(year, month, day=None):
-    # 引数により翌日/翌月を計算し、その月を返す
-    # 翌月
+    # calculate next month / day & return the month
+    # month
     if day is None:
         dt = datetime.date(year, month, 1)
         return (dt + relativedelta(months=1)).month
-    # 翌日
+    # day
     else:
         dt = datetime.date(year, month, day)
         return (dt + datetime.timedelta(days=1)).month
@@ -71,6 +71,6 @@ def next_month(year, month, day=None):
 
 @register.simple_tag
 def next_day(year, month, day):
-    # 引数により翌日を計算し、その日を返す
+    # calculate next day & return the day
     dt = datetime.date(year, month, day)
     return (dt + datetime.timedelta(days=1)).day

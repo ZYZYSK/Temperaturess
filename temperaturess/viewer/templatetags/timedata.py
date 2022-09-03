@@ -7,7 +7,7 @@ register = template.Library()
 # 気温の平均値
 def average_temperature(datas: list):
     if len(datas) == 0: return
-    temperatures = [data.temperature for data in datas]
+    temperatures = [data["temperature"] for data in datas]
     return np.average(temperatures)
 
 
@@ -15,7 +15,7 @@ def average_temperature(datas: list):
 # 湿度の平均値
 def average_humidity(datas: list):
     if len(datas) == 0: return
-    humidities = [data.humidity for data in datas]
+    humidities = [data["humidity"] for data in datas]
     return np.average(humidities)
 
 
@@ -23,7 +23,6 @@ def average_humidity(datas: list):
 # 気温の最小値と時間
 def min_temperature(datas: list, i=1):
     if len(datas) == 0: return
-    datas = [data.__dict__ for data in datas]
     if i == 1:
         return min(datas, key=lambda x: x['temperature'])['temperature']
     else:
@@ -34,7 +33,6 @@ def min_temperature(datas: list, i=1):
 # 湿度の最小値と時間
 def min_humidity(datas: list, i=1):
     if len(datas) == 0: return
-    datas = [data.__dict__ for data in datas]
     if i == 1:
         return min(datas, key=lambda x: x['humidity'])['humidity']
     else:
@@ -45,7 +43,6 @@ def min_humidity(datas: list, i=1):
 # 気温の最大値と時間
 def max_temperature(datas: list, i=1):
     if len(datas) == 0: return
-    datas = [data.__dict__ for data in datas]
     if i == 1:
         return max(datas, key=lambda x: x['temperature'])['temperature']
     else:
@@ -56,7 +53,6 @@ def max_temperature(datas: list, i=1):
 # 湿度の最大値と時間
 def max_humidity(datas: list, i=1):
     if len(datas) == 0: return
-    datas = [data.__dict__ for data in datas]
     if i == 1:
         return max(datas, key=lambda x: x['humidity'])['humidity']
     else:

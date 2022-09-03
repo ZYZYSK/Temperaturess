@@ -3,133 +3,128 @@
 {% load datetime %}
 {% load exists %}
 {% load timedata %}
-{% comment %} リンク {% endcomment %}
+{% comment %} link {% endcomment %}
 {% block link %}
     <link rel="stylesheet" href="{% static 'day.css' %}">
 {% endblock link %}
-{% comment %} ナビゲーションバー {% endcomment %}
+{% comment %} navigation bar {% endcomment %}
 {% block nav %}
-  {% comment %} 前日 {% endcomment %}
+  {% comment %} previous day {% endcomment %}
   {% previous_year year month day as previous_year%}
   {% previous_month year month day as previous_month%}
   {% previous_day year month day as previous_day%}
   {% exist_day previous_year previous_month previous_day as exist_day_previous %}
   <li class="nav-item ms-3 ms-sm-0 me-sm-3">
-    {% comment %} 前日のデータが存在する場合 {% endcomment %}
+    {% comment %} if previous day's exists  {% endcomment %}
     {% if exist_day_previous %}
-    <a href={% url 'day' previous_year previous_month previous_day %} class="nav-link">
-    {% comment %} 存在しない場合 {% endcomment %}
+      <a href={% url 'day' previous_year previous_month previous_day %} class="nav-link">
     {% else %}
-    <a class="nav-link disabled">
+      <a class="nav-link disabled">
     {% endif %}
     <前日</a>
   </li>
-  {% comment %} 今日の日付 {% endcomment %}
+  {% comment %} current page's day {% endcomment %}
   <li class="nav_item ms-3 ms-sm-0 mt-2">
     <span class="navbar-brand h1">{{year}} 年 {{month}} 月 {{day}} 日</span>
   </li>
-  {% comment %} 翌日 {% endcomment %}
+  {% comment %} next day {% endcomment %}
   {% next_year year month day as next_year%}
   {% next_month year month day as next_month%}
   {% next_day year month day as next_day%}
   {% exist_day next_year next_month next_day as exist_day_next %}
   <li class="nav-item ms-3 ms-sm-1">
-    {% comment %} 翌日のデータが存在する場合 {% endcomment %}
+    {% comment %} if next day's data exists {% endcomment %}
     {% if exist_day_next %}
-    <a href={% url 'day' next_year next_month next_day %} class="nav-link">
-      {% comment %} それ以外 {% endcomment %}
+      <a href={% url 'day' next_year next_month next_day %} class="nav-link">
     {% else %}
-    <a  class="nav-link disabled">
+      <a  class="nav-link disabled">
     {% endif %}
     翌日></a>
   </li>
 {% endblock nav %}
-{% block free %}
-  {% comment %} 一覧 {% endcomment %}
-  <div id="div_table_main">
-    <table id="table_main" class="table table-sm table-striped table-hover table-bordered">
-      <thead>
-        <tr>
-          <th class="table_main_th" scope="col">時刻</th>
-          <th class="table_main_th" scope="col">気温(°C)</th>
-          <th class="table_main_th" scope="col">湿度(%)</th>
-          <th class="table_main_th" scope="col">外部</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for timedata in timedatas %}
-        <tr>
-          <th scope="row">{{timedata.tm|time:"H:i"}}</th>
-          <td>{{timedata.temperature|floatformat:1}}</td>
-          <td>{{timedata.humidity|floatformat:0}}</td>
-          <td>{% if timedata.is_external %}O{% else %}X{% endif %}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
 
-  {% comment %} 要約 {% endcomment %}
-  <div id="div_table_summary">
-    <table id="table_summary" class="table table-sm table-hover table-dark h6">
-      <thead>
-        <tr>
-          <th scope="col" class="table_summary_border">#</th>
-          <th scope="col" class="table_summary_border">平均値</th>
-          <th scope="col">時刻</th>
-          <th scope="col" class="table_summary_border">最低値</th>
-          <th scope="col">時刻</th>
-          <th scope="col" class="table_summary_border">最高値</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <th scope="row" class="table_summary_border">
-            気温(°C)
-          </th>
-          <td class="table_summary_border">
-            {{timedatas|average_temperature|floatformat:1}}
-            {% if timedatas|length != 288 %}){% endif %}
-          </td>
-          <td>
-            {{timedatas|min_temperature:0|time:"H:i"}}
-          </td>
-          <td class="table_summary_border">
-            {{timedatas|min_temperature|floatformat:1}}
-            {% if timedatas|length != 288 %}){% endif %}
-          </td>
-          <td>
-            {{timedatas|max_temperature:0|time:"H:i"}}
-          </td>
-          <td class="table_summary_border">
-            {{timedatas|max_temperature|floatformat:1}}
-            {% if timedatas|length != 288 %}){% endif %}
-          </td>
-        </tr>
-        <tr>
-          <th scope="row" class="table_summary_border">
-            湿度(%)
-          </th>
-          <td class="table_summary_border">
-            {{timedatas|average_humidity|floatformat:0}}
-          </td>
-          <td>
-            {{timedatas|min_humidity:0|time:"H:i"}}
-          </td>
-          <td class="table_summary_border">
-            {{timedatas|min_humidity|floatformat:0}}
-          </td>
-          <td>
-            {{timedatas|max_humidity:0|time:"H:i"}}
-          </td>
-          <td class="table_summary_border">
-            {{timedatas|max_humidity|floatformat:0}}
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  {% comment %} グラフ {% endcomment %}
+{% block free %}
+  {% comment %} table {% endcomment %}
+  <table id="table_main" class="table table-sm table-striped table-hover table-bordered">
+    <thead>
+      <tr>
+        <th class="table_main_th" scope="col">時刻</th>
+        <th class="table_main_th" scope="col">気温(°C)</th>
+        <th class="table_main_th" scope="col">湿度(%)</th>
+        <th class="table_main_th" scope="col">外部</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for timedata in timedatas %}
+      <tr>
+        <th scope="row">{{timedata.tm|time:"H:i"}}</th>
+        <td>{{timedata.temperature|floatformat:1}}</td>
+        <td>{{timedata.humidity|floatformat:0}}</td>
+        <td>{% if timedata.is_external %}O{% else %}X{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% comment %} summary table {% endcomment %}
+  <table id="table_summary" class="table table-sm table-hover table-dark h6">
+    <thead>
+      <tr>
+        <th scope="col" class="table_summary_border">#</th>
+        <th scope="col" class="table_summary_border">平均値</th>
+        <th scope="col">時刻</th>
+        <th scope="col" class="table_summary_border">最低値</th>
+        <th scope="col">時刻</th>
+        <th scope="col" class="table_summary_border">最高値</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row" class="table_summary_border">
+          気温(°C)
+        </th>
+        <td class="table_summary_border">
+          {{timedatas|average_temperature|floatformat:1}}
+          {% if timedatas|length != 288 %}){% endif %}
+        </td>
+        <td>
+          {{timedatas|min_temperature:0|time:"H:i"}}
+        </td>
+        <td class="table_summary_border">
+          {{timedatas|min_temperature|floatformat:1}}
+          {% if timedatas|length != 288 %}){% endif %}
+        </td>
+        <td>
+          {{timedatas|max_temperature:0|time:"H:i"}}
+        </td>
+        <td class="table_summary_border">
+          {{timedatas|max_temperature|floatformat:1}}
+          {% if timedatas|length != 288 %}){% endif %}
+        </td>
+      </tr>
+      <tr>
+        <th scope="row" class="table_summary_border">
+          湿度(%)
+        </th>
+        <td class="table_summary_border">
+          {{timedatas|average_humidity|floatformat:0}}
+        </td>
+        <td>
+          {{timedatas|min_humidity:0|time:"H:i"}}
+        </td>
+        <td class="table_summary_border">
+          {{timedatas|min_humidity|floatformat:0}}
+        </td>
+        <td>
+          {{timedatas|max_humidity:0|time:"H:i"}}
+        </td>
+        <td class="table_summary_border">
+          {{timedatas|max_humidity|floatformat:0}}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  {% comment %} graph {% endcomment %}
   <div id="graph">
     <ul class="nav nav-tabs" role="tablist">
       <li class="nav-item" role="presentation">
@@ -152,16 +147,23 @@
       </div>
     </div>
   </div>
-{% comment %} スクリプト {% endcomment %}
+{% comment %} scripts {% endcomment %}
 <script type="text/javascript">
-  {% comment %} テーブルソート機能 {% endcomment %}
+  {% comment %} sort tables {% endcomment %}
   $(document).ready(function(){
-    $('#table_main').DataTable({
+    var table=$("#table_main").DataTable({
       "paging":false,
       "info":false,
       "searching":false,
-      "order":[[0,'desc']]
+      "order":[[0,'desc']],
+      "scrollY":300,
+      "columnDefs":[{"width":"25%","targets":"_all"}]
+    });
+    // resize table
+    $(window).on("resize",function(){
+      table.columns.adjust();
     });
   });
+
 </script>
 {% endblock free %}

@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 {% block free %}
-{% comment %} ファイルのアップロード {% endcomment %}
+{% comment %} upload file {% endcomment %}
 <form id="form" method="post" enctype="multipart/form-data">
     <div class="mt-3 mb-3 ms-2 me-2">
         {% csrf_token %}
         <input type="file" name="content" id="input_file" class="form-control" accept=".txt,.csv">
     </div>
-    {% comment %} 種類選択 {% endcomment %}
+    {% comment %} select file type {% endcomment %}
     <div class="mt-4">
         <p class="text-center fs-2">ファイルの種類は？</p>
     </div>
@@ -41,13 +41,13 @@
 {% endif %}
 </div>
 
-{% comment %} スクリプト {% endcomment %}
+{% comment %} script {% endcomment %}
 <script>
-    {% comment %} ファイルが入力されたら、アップロード可能にする {% endcomment %}
+    {% comment %} enable upload when a file is selected {% endcomment %}
     $('#input_file').on('change',function(){
         $('#btn_upload').removeClass('disabled');
     });
-    {% comment %} アップロードボタンを押したら、処理中の文字を表示 {% endcomment %}
+    {% comment %} show status when uploading {% endcomment %}
     $('#btn_upload').on('click',async function(){
         $('#txt_processing').removeClass('d-none')
         $('#txt_state').addClass('d-none')
@@ -67,7 +67,7 @@
             document.write(await response.text());
             document.close();
         }
-        
+
     });
 </script>
 {% endblock free %}

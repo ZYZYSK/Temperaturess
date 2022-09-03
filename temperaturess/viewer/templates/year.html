@@ -3,40 +3,38 @@
 {% load datetime %}
 {% load exists %}
 {% load daydata_year %}
-{% comment %} ナビゲーションバー {% endcomment %}
+{% comment %} navigation bar {% endcomment %}
 {% block nav %}
   {% previous_year year as previous_year%}
-  {% comment %} 前年 {% endcomment %}
+  {% comment %} previous year {% endcomment %}
   <li class="nav-item ms-3 ms-sm-0 me-sm-3">
-    {% comment %} 前年のデータが存在する場合 {% endcomment %}
+    {% comment %} if previous year's data exists {% endcomment %}
     {% if previous_year|exist_year %}
-    <a href={% url 'year' previous_year %} class="nav-link">
-    {% comment %} 存在しない場合 {% endcomment %}
+      <a href={% url 'year' previous_year %} class="nav-link">
     {% else %}
-    <a class="nav-link disabled">
+      <a class="nav-link disabled">
     {% endif %}
     <前年</a>
   </li>
-  {% comment %} 今年 {% endcomment %}
+  {% comment %} current page's year {% endcomment %}
   <li class="nav_item ms-3 ms-sm-0 mt-2">
     <span class="navbar-brand h1">{{year}} 年</span>
   </li>
-  {% comment %} 翌年 {% endcomment %}
+  {% comment %} next year {% endcomment %}
   {% next_year year as next_year%}
   <li class="nav-item ms-3 ms-sm-1">
-    {% comment %} 翌年のデータが存在する場合 {% endcomment %}
+    {% comment %} if next year's data exists {% endcomment %}
     {% if next_year|exist_year %}
-    <a href={% url 'year' next_year %} class="nav-link">
-    {% comment %} 存在しない場合 {% endcomment %}
+      <a href={% url 'year' next_year %} class="nav-link">
     {% else %}
-    <a class="nav-link disabled">
+      <a class="nav-link disabled">
     {% endif %}
     翌年></a>
   </li>
 {% endblock nav %}
 
 {% block free %}
-{% comment %} 一覧 {% endcomment %}
+{% comment %} table {% endcomment %}
   <div id="dib_table_main">
     <table id="table_main" class="table table-sm table-hover table-bordered">
       <thead>
