@@ -1,4 +1,5 @@
 # copy files
+cd ../
 cp -r Temperaturess /opt
 cd /opt/Temperaturess
 echo "current directory: "+`pwd`
