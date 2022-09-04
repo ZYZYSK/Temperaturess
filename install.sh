@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # delete files if exists
 if [ -d /opt/Temperaturess ]; then
     rm -r /opt/Temperaturess
@@ -12,7 +14,7 @@ echo "current directory: "+`pwd`
 pip install virtualenv
 python -m virtualenv venv_temperaturess
 # enable virtualenv
-~/.bashrc venv_temperaturess/bin/activate
+source venv_temperaturess/bin/activate
 # install libraries
 sudo apt install libglib2.0-dev
 pip install --upgrade pip
