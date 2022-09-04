@@ -26,3 +26,4 @@ pip install bluepy
 pip install uwsgi
 
 # crontab
+crontab crontab.txt
