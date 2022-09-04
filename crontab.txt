@@ -1,2 +1,2 @@
-*/5 * * * * cd /home/pi/Temperature-Viewer/temperaturess; source /home/pi/temperaturess/bin/activate; /home/pi/temperaturess/bin/python3 manage.py inkbird >> /home/pi/Temperature-Viewer/temperaturess.log 2>&1
+*/5 * * * * cd /opt/temperaturess; source venv_temperaturess/bin/activate; /home/pi/temperaturess/bin/python3 manage.py inkbird >> /home/pi/Temperature-Viewer/temperaturess.log 2>&1
 0 */2 * * * sleep 30; rclone copy /home/pi/Temperature-Viewer/temperaturess/db.sqlite3 Temperature-Viewer_GoogleDrive:Temperature-Viewer
