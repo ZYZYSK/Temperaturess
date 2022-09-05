@@ -164,8 +164,13 @@ class Inkbird:
             "d3": self.humidity,
             "d4": self.is_external,
         }
-        am = ambient.Ambient(self.channel_id, self.write_key)
-        am.send(data)
+        try:
+            am = ambient.Ambient(self.channel_id, self.write_key)
+            am.send(data)
+        except Exception as e:
+            self.logger.error(traceback.format_exc())
+        else:
+            self.logger.debug("Successfully uploaded to Ambient.")
 
 
 class Command(BaseCommand):

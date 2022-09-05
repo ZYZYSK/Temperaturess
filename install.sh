@@ -20,5 +20,7 @@ pip install bluepy
 pip install uwsgi
 
 # crontab
-echo "*/5 * * * * cd ${HOME}/Temperaturess; source venv_temperaturess/bin/activate; venv_temperatures/bin/python3 temperaturess/manage.py inkbird" > crontab.txt
+echo "*/5 * * * * cd ${HOME}/Temperaturess; source venv_temperaturess/bin/activate; cd temperaturess; ../venv_temperaturess/bin/python3 manage.py inkbird" > crontab.txt
 crontab crontab.txt
+
+
