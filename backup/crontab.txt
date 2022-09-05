@@ -1,1 +1,1 @@
-0 */2 * * * sleep 30; rclone copy /opt/Temperaturess/temperaturess/db.sqlite3 huang:Temperaturess
+0 */2 * * * sleep 30; rclone copy /home/pi/Temperaturess/temperaturess/db.sqlite3 huang:Temperaturess

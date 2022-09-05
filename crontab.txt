@@ -1,1 +1,0 @@
-*/5 * * * * cd /opt/temperaturess; source venv_temperaturess/bin/activate; venv_temperatures/bin/python3 manage.py inkbird
