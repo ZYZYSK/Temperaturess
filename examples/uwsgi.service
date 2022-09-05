@@ -3,7 +3,7 @@ Description = uWSGI
 After = syslog.target
 
 [Service]
-ExecStart = /home/pi/temperaturess/bin/uwsgi --ini /home/pi/Temperaturess/uwsgi.ini
+ExecStart = /home/pi/Temperaturess/venv_temperaturess/bin/uwsgi --ini /home/pi/Temperaturess/uwsgi.ini
 Restart=always
 KillSignal=SIGQUIT
 Type=notify
