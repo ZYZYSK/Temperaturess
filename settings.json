@@ -3,9 +3,9 @@
     "handle": "0x0028",
     "channel_id": "46295",
     "write_key": "4b49c065ac4682f3",
-    "retry_bluetooth": 2,
+    "retry_bluetooth": 3,
     "retry_net": 2,
-    "is_debug": true,
+    "is_debug": false,
     "_comment": {
         "mac_address": "MAC address of inkbird",
         "handle": "0x0028",

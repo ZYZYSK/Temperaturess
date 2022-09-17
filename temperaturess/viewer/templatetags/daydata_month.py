@@ -43,17 +43,17 @@ def average_day_humidity_avg(datas):
 
 @register.filter
 def average_normal_temperature_min(datas):
-    temperatures = [data["normaldata"].temperature_min for data in datas if data["daydata"] is not None]
+    temperatures = [data["normaldata"].temperature_min for data in datas if data["normaldata"] is not None]
     return np.average(temperatures)
 
 
 @register.filter
 def average_normal_temperature_max(datas):
-    temperatures = [data["normaldata"].temperature_max for data in datas if data["daydata"] is not None]
+    temperatures = [data["normaldata"].temperature_max for data in datas if data["normaldata"] is not None]
     return np.average(temperatures)
 
 
 @register.filter
 def average_normal_temperature_avg(datas):
-    temperatures = [data["normaldata"].temperature_avg for data in datas if data["daydata"] is not None]
+    temperatures = [data["normaldata"].temperature_avg for data in datas if data["normaldata"] is not None]
     return np.average(temperatures)
