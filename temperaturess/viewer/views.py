@@ -1,6 +1,7 @@
 
 # Create your views here.
 
+from ast import arg
 from curses.ascii import isalpha
 import numpy as np
 import base64
@@ -61,17 +62,20 @@ class MonthView(TemplateView):
     template_name = "month.html"
     # アスタリスク1つ：可変長引数(タプル型)
     # アスタリスク2つ：辞書型引数
+    def get(self, request, *args, **kwargs):
+        # you can't get this month's data if today's date is 1
+        tm_current = timezone.datetime.now()
+        if tm_current.year == kwargs["year"] and tm_current.month == kwargs["month"] and tm_current.day == 1:
+            if kwargs["month"] == 1:
+                kwargs["year"]-=1
+            else:
+                kwargs["month"]-=1
+            return redirect("month",kwargs["year"],kwargs["month"])
+        return super().get(request,*args,**kwargs)
 
     def get_context_data(self, **kwargs):
         # pass date separately
         kwargs["day"] = 1
-        # you can't get this month's data if today's date is 1
-        tm_current = timezone.now()
-        if tm_current.year == kwargs["year"] and tm_current.month == kwargs["month"] and tm_current.day == 1:
-            if kwargs["month"] == 1:
-                return redirect("month", year=kwargs["year"] - 1, month=12)
-            else:
-                return redirect("month", year=kwargs["year"], month=kwargs["month"] - 1)
         # get objects from database
         daydatas = get_list_or_404(DayData.objects.filter(day__year=kwargs["year"], day__month=kwargs["month"]).order_by("day"))
         normaldatas = get_list_or_404(NormalData.objects.filter(day__month=kwargs["month"]).order_by("day"))
