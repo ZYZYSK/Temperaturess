@@ -154,12 +154,14 @@ class MonthView(TemplateView):
             # append data
             y_5_temperatures_daydata.append(np.mean([t["temperature_avg"] for t in y_5_dicts_daydata]))
             y_5_temperatures_normaldata.append(np.mean([t["temperature_avg"] for t in y_5_dicts_normaldata]))
-        kwargs["graph_5"] = self.graph_5(
-            x=x_daydatas,
-            graph_x_n=x_normaldatas,
-            y=y_5_temperatures_daydata,
-            y_n=y_5_temperatures_normaldata
-        )
+        # draw graph
+        if len(x_daydatas):
+            kwargs["graph_5"] = self.graph_5(
+                x=x_daydatas,
+                graph_x_n=x_normaldatas,
+                y=y_5_temperatures_daydata,
+                y_n=y_5_temperatures_normaldata
+            )
 
     def graph_1(self, x: list, x_n: list, y_min: list, y_max: list, y_avg: list, y_n_min: list = None, y_n_max: list = None, y_n_avg: list = None, dtick: int = 1):
         # draw daydatas
