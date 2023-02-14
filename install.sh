@@ -9,7 +9,7 @@ python -m virtualenv venv_temperaturess
 # enable virtualenv
 source venv_temperaturess/bin/activate
 # install libraries
-sudo apt install libglib2.0-dev
+sudo apt install libglib2.0-dev libssl-dev
 pip install --upgrade pip
 pip install django
 pip install numpy
