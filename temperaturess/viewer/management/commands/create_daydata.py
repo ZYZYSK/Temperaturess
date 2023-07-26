@@ -9,6 +9,7 @@ import binascii
 
 from django.db import IntegrityError
 from django.utils import timezone
+from django.utils.timezone import localtime
 from django.core.management.base import BaseCommand
 
 from ...models import *
@@ -35,22 +36,11 @@ def create_log(is_debug: bool = False) -> logging.Logger:
     return logger
 
 
-class Inkbird:
+class CreateDaydata:
     def __init__(
         self,
-        address: str,
-        handle: str,
-        channel_id: str,
-        write_key: str,
         logger: logging.Logger,
     ) -> None:
-        # MAC address
-        self.address = address
-        # handle
-        self.handle = int(handle, 16)
-        # Ambient
-        self.channel_id = channel_id
-        self.write_key = write_key
         # Log
         self.logger = logger
         # for debugging
@@ -62,17 +52,16 @@ class Inkbird:
         # DayData
         # if self.tm.hour == 0 and self.tm.minute == 0:
         try:
-            # self.tm = timezone.datetime.now()
-            # self.tm = timezone.make_aware(self.tm)
-            # day = datetime.datetime.date(self.tm - datetime.timedelta(days=1))
-            day = timezone.datetime(2023, 7, 24)
+            self.tm = timezone.datetime.now()
+            self.tm = timezone.make_aware(self.tm)
+            day = datetime.datetime(2023, 7, 24)
             day = timezone.make_aware(day)
             # 作成
             timedatas = TimeData.objects.filter(
                 tm__year=day.year, tm__month=day.month, tm__day=day.day
             )
             datas = timedatas.values()
-
+            [print(timedata) for timedata in timedatas]
             # get min & max temperature
             temperature_min = min([data.get("temperature") for data in datas])
             temperature_max = max([data.get("temperature") for data in datas])
@@ -89,7 +78,7 @@ class Inkbird:
             timedata_humidity_max = timedatas.filter(humidity=humidity_max).first()
 
             # get average temperature & humidity
-            time_past = datetime.datetime(day.year, day.month, day.day, 0, 0)
+            time_past = timedatas[0].tm
             temperature_sum = np.sum([data.get("temperature") for data in datas])
             humidity_sum = np.sum([data.get("humidity") for data in datas])
             temperature_temp0 = np.mean([data.get("temperature") for data in datas])
@@ -137,6 +126,7 @@ class Inkbird:
                             cnt_errors * (humidity_temp0 + humidity_temp1) / 2
                         )
                         cnt_errors = 0
+                    print(f"{time_past}: no data")
                 # advance the time
                 time_past += datetime.timedelta(minutes=5)
             # check if all datas were recorded
@@ -186,17 +176,11 @@ class Command(BaseCommand):
         # load settings
         _settings = open("../settings.json")
         settings = json.load(_settings)
-        MAC_ADDRESS = settings["mac_address"]
-        HANDLE = settings["handle"]
-        CHANNEL_ID = settings["channel_id"]
-        WRITE_KEY = settings["write_key"]
-        RETRY_BLUETOOTH = settings["retry_bluetooth"]
-        RETRY_NET = settings["retry_net"]
         IS_DEBUG = settings["is_debug"]
 
         # set log
         logger = create_log(IS_DEBUG)
         logger.debug("Successfully created log.")
 
-        app = Inkbird(MAC_ADDRESS, HANDLE, CHANNEL_ID, WRITE_KEY, logger)
+        app = CreateDaydata(logger)
         app.create_daydata()

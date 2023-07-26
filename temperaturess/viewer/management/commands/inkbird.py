@@ -107,12 +107,10 @@ class Inkbird:
                 f"Successfully created TimeData ({self.tm}, {self.temperature}C, {self.humidity}%)."
             )
         # DayData
-        # if True:
         if self.tm.hour == 0 and self.tm.minute == 0:
             try:
                 # 作成
                 day = datetime.datetime.date(self.tm - datetime.timedelta(days=1))
-                # day = day.replace(year=2023, month=7, day=24)
                 timedatas = TimeData.objects.filter(
                     tm__year=day.year, tm__month=day.month, tm__day=day.day
                 )
@@ -134,7 +132,7 @@ class Inkbird:
                 timedata_humidity_max = timedatas.filter(humidity=humidity_max).first()
 
                 # get average temperature & humidity
-                time_past = datetime.datetime(day.year, day.month, day.day, 0, 0)
+                time_past = timedatas[0].tm
                 temperature_sum = np.sum([data.get("temperature") for data in datas])
                 humidity_sum = np.sum([data.get("humidity") for data in datas])
                 temperature_temp0 = np.mean([data.get("temperature") for data in datas])
