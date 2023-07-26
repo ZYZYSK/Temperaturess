@@ -43,10 +43,6 @@ class CreateDaydata:
     ) -> None:
         # Log
         self.logger = logger
-        # for debugging
-        self.logger.debug(
-            f"MAC address: {self.address}, handle: {self.handle}, Channel ID: {self.channel_id}, write_key: {self.write_key}."
-        )
 
     def create_daydata(self):
         # DayData
