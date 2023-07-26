@@ -162,11 +162,12 @@ class Inkbird:
                             cnt_errors = 0
                         temperature_temp0 = temperature_temp1
                         humidity_temp0 = humidity_temp1
+
                     # use the previous data if doesn't exist
                     else:
                         cnt_errors += 1
                         # if it is the last timedata in that day
-                        if index == 288:
+                        if index == 287:
                             temperature_temp1 = np.mean(
                                 [data.get("temperature") for data in datas]
                             )
